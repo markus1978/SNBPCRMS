@@ -1,0 +1,13 @@
+logs
+project/project
+project/target
+target
+tmp
+
+# Eclipse
+.settings
+.cache
+.project
+.classpath
+.scala_dependencies
+bin

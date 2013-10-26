@@ -1,0 +1,23 @@
+@(user: models.PagedUserHolderList.UserHolder)
+
+<div>
+	<div class="twitter_profile">
+		<div class="profile_conent">
+			<div class="profile_image">
+				<img src="@user.getImageURL()"></img>
+			</div>
+			<div class="profile_texts">
+				<a target="new" href="@user.getProfileURL()">@user.getName()</a>&nbsp;<span style="color: #AAAAAA">@@@user.getScreenName()</span>
+				<p class="twitter_description">@user.getDescription()</p>
+			</div>
+		</div>
+		<div class="profile_stats">
+			tweets: <a href="@user.getProfileURL()">@user.getTweetCount()</a>,&nbsp;
+			follows: <a href="@routes.Application.users("friends: " + user.getScreenName(), -1)">@user.getFriendsCount()</a>,&nbsp;
+			followers: <a href="@routes.Application.users("followers: " + user.getScreenName(), -1)">@user.getFollowersCount()</a>
+		</div> 
+	</div>
+	<div class="twitter_data">
+		@if(user.isFollower()) { follows } else { <a href="https://twitter.com/@user.getScreenName()">NOT follows</a> }
+	</div>
+</div>
