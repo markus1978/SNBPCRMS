@@ -89,6 +89,10 @@ public class Application extends Controller {
     	}
     }
     
+    public static Result importAll(String query) {
+    	return ok(index.render("Import All is not done yet."));
+    }
+    
     private static PagedUserHolderList friends(String screenName, long cursor) throws TwitterException {
     	User twitterUser = twitter().showUser(screenName);
 		PagableResponseList<User> pagableTwitterUsers = twitter().getFriendsList(screenName, cursor);

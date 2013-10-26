@@ -10,4 +10,5 @@ tmp
 .project
 .classpath
 .scala_dependencies
+.target
 bin
