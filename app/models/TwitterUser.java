@@ -52,4 +52,6 @@ public class TwitterUser extends Model {
 
 	@Constraints.Required
 	public String description;
+	
+	public static Finder<Long,TwitterUser> find = new Finder<Long,TwitterUser>(Long.class, TwitterUser.class); 
 }

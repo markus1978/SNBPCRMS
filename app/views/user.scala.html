@@ -1,23 +1,41 @@
-@(user: models.PagedUserHolderList.UserHolder)
+@(user: models.PagedUserHolderList.UserHolder, form: Form[TwitterUser])
 
-<div>
-	<div class="twitter_profile">
-		<div class="profile_conent">
-			<div class="profile_image">
-				<img src="@user.getImageURL()"></img>
-			</div>
-			<div class="profile_texts">
-				<a target="new" href="@user.getProfileURL()">@user.getName()</a>&nbsp;<span style="color: #AAAAAA">@@@user.getScreenName()</span>
-				<p class="twitter_description">@user.getDescription()</p>
-			</div>
+<td class="twitter_profile">
+	<div class="profile_conent">
+		<div class="profile_image">
+			<img src="@user.getImageURL()"></img>
 		</div>
-		<div class="profile_stats">
-			tweets: <a href="@user.getProfileURL()">@user.getTweetCount()</a>,&nbsp;
-			follows: <a href="@routes.Application.users("friends: " + user.getScreenName(), -1)">@user.getFriendsCount()</a>,&nbsp;
-			followers: <a href="@routes.Application.users("followers: " + user.getScreenName(), -1)">@user.getFollowersCount()</a>
-		</div> 
+		<div class="profile_texts">
+			<a target="new" href="@user.getProfileURL()">@user.getName()</a>&nbsp;<span style="color: #AAAAAA">@@@user.getScreenName()</span>
+			<p class="twitter_description">@user.getDescription()</p>
+		</div>
 	</div>
-	<div class="twitter_data">
-		@if(user.isFollower()) { follows } else { <a href="https://twitter.com/@user.getScreenName()">NOT follows</a> }
+	<div class="profile_stats">
+		tweets: <a href="@user.getProfileURL()">@user.getTweetCount()</a>,&nbsp;
+		follows: <a href="@routes.Application.users("friends: " + user.getScreenName(), -1)">@user.getFriendsCount()</a>,&nbsp;
+		followers: <a href="@routes.Application.users("followers: " + user.getScreenName(), -1)">@user.getFollowersCount()</a>
+	</div> 
+</td>
+<td class="twitter_data">
+	<div>
+		@if(user.getTwitterUser().isFollower) { 
+			<span style="color: #22FF22">follows</span> 
+		} else { 
+			<span style="color: @{if (user.getTwitterUser().isFriend) "#FF2222" else "#AAAA00"}">follows NOT</span>
+		}
 	</div>
-</div>
+	<div>
+		@if(user.getTwitterUser().isFriend) { 
+			<span style="color: @{if (user.getTwitterUser().isFollower) "#22FF22" else "#FF2222"}">friend</span> 
+		} else { 
+			<span>NOT a friend</span>
+		}
+	</div>
+</td>
+<td class="general_data">
+	<input type="hidden" name="id" value="@user.getTwitterUser().id">
+	@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")
+	@helper.select(form("status"), options = Seq("neutral"->"Neutral", "wishlist" -> "Wishlist", "ignored"->"Ignored", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")
+	@helper.select(form("tier"), options = Seq("tier1"->"Tier 1", "tier2" -> "Tier 2", "tier3"->"Tier 3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")	
+</td>
+

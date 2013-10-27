@@ -2,7 +2,7 @@
 
 @main {
     
-    <h1 id="homeTitle">Query: "@query", results in @users.totalSize() twitter users</h1>
+    <h1 id="homeTitle">Query: "<span style="color: #555555" id="query">@query</span>", results in @users.totalSize() twitter users</h1>
 
     @if(flash.containsKey("success")) {
         <div class="alert-message warning">
@@ -18,7 +18,7 @@
             <input type="submit" id="execute" value="Execute" class="btn primary">
         </form>
    
-   		<a href="@routes.Application.importAll(query)" class="btn">Import all</a>
+   		<input type="button" id="importAll" value="Import/Update all" class="btn success">
     </div>
     
     @if(users.size() == 0) {  
@@ -29,15 +29,18 @@
         <table class="computers zebra-striped">
             <thead>
                 <tr>
-                    <th class="header">Friends</th>
+                    <th class="header">Twitter's data</th>
+                    <th class="header">Our Twitter data</th>
+                    <th class="header">global data</th>
                 </tr>
             </thead>
             <tbody>
                 @for(userModel <- users) {
                     <tr>
-                        <td>
-                        	@user(userModel)                        	
-                        </td>            
+                    	@{
+                    		val form = Form.form(classOf[TwitterUser]).fill(userModel.getTwitterUser());
+                    		user(userModel, form)                    	
+                    	}                                                	                                  
                     </tr>
                 }
 

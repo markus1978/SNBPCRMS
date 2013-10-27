@@ -4,17 +4,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.avaje.ebean.Page;
+import models.TwitterUser.Category;
 
 import play.db.ebean.Model.Finder;
-
 import twitter4j.Friendship;
 import twitter4j.PagableResponseList;
-import twitter4j.Relationship;
 import twitter4j.ResponseList;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.User;
+
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Page;
 
 public class PagedUserHolderList extends ArrayList<PagedUserHolderList.UserHolder> {
 	
@@ -33,8 +34,7 @@ public class PagedUserHolderList extends ArrayList<PagedUserHolderList.UserHolde
 		int getFollowersCount();
 		int getFriendsCount();
 		int getTweetCount();
-		boolean isFriend();
-		boolean isFollower();
+		TwitterUser getTwitterUser();
 	}
 	
 	public static class UserHolder implements IUserHolder {
@@ -88,13 +88,8 @@ public class PagedUserHolderList extends ArrayList<PagedUserHolderList.UserHolde
 		}
 
 		@Override
-		public boolean isFriend() {
-			return myTwitterUser.isFriend;
-		}
-
-		@Override
-		public boolean isFollower() {
-			return myTwitterUser.isFollower;
+		public TwitterUser getTwitterUser() {
+			return myTwitterUser;
 		}
 	}
 	
@@ -112,28 +107,35 @@ public class PagedUserHolderList extends ArrayList<PagedUserHolderList.UserHolde
 		ResponseList<Friendship> friendships = twitter.lookupFriendships(ids);
 		i = 0;
 		
-		Finder<Long, TwitterUser> finder = new Finder<Long, TwitterUser>(Long.class, TwitterUser.class);
 		for (twitter4j.User twitterUser: pagableTwitterUsers) {
 			Friendship twitterFriendship = friendships.get(i++);
 			
-			TwitterUser myTwitterUser = finder.byId(twitterUser.getId());
-			if (myTwitterUser == null) {
-				myTwitterUser = new TwitterUser();
-				myTwitterUser.id = twitterUser.getId();
-				myTwitterUser.added = new Date();
-			}
-			myTwitterUser.lastUpdated = new Date();
-			myTwitterUser.isFollower = twitterFriendship.isFollowedBy();
-			myTwitterUser.isFriend = twitterFriendship.isFollowing();
-			myTwitterUser.friendsCount = twitterUser.getFriendsCount();
-			myTwitterUser.followersCount = twitterUser.getFollowersCount();
-			myTwitterUser.description = twitterUser.getDescription();
-			myTwitterUser.save();
-			
-			result.add(new UserHolder(twitterUser, myTwitterUser));
+			result.add(new UserHolder(twitterUser, update(null, twitterUser, twitterFriendship)));
 		}
 		
 		return result;
+	}
+	
+	private static TwitterUser update(TwitterUser myTwitterUser, User twitterUser, Friendship twitterFriendship) {
+		if (myTwitterUser == null) {
+			myTwitterUser = TwitterUser.find.byId(twitterUser.getId());
+			if (myTwitterUser == null) {
+				myTwitterUser = new TwitterUser();
+				myTwitterUser.id = twitterUser.getId();
+				myTwitterUser.screenName = twitterUser.getScreenName();
+				myTwitterUser.added = new Date();
+			}
+		}
+		myTwitterUser.lastUpdated = new Date();
+		if (twitterFriendship != null) {
+			myTwitterUser.isFollower = twitterFriendship.isFollowedBy();
+			myTwitterUser.isFriend = twitterFriendship.isFollowing();
+		}
+		myTwitterUser.friendsCount = twitterUser.getFriendsCount();
+		myTwitterUser.followersCount = twitterUser.getFollowersCount();
+		myTwitterUser.description = twitterUser.getDescription();
+		Ebean.save(myTwitterUser);
+		return myTwitterUser;
 	}
 	
 	public static PagedUserHolderList create(Twitter twitter, twitter4j.User user, Page<TwitterUser> myTwitterUsers) throws TwitterException {
@@ -147,6 +149,9 @@ public class PagedUserHolderList extends ArrayList<PagedUserHolderList.UserHolde
 		
 		int i = 0;
 		for(TwitterUser myTwitterUser: myTwitterUsersList) {
+			if (myTwitterUser.category == Category.developer) {
+				System.out.println("###########################");
+			}
 			ids[i++] = myTwitterUser.id;
 		}
 		
@@ -154,7 +159,7 @@ public class PagedUserHolderList extends ArrayList<PagedUserHolderList.UserHolde
 		i = 0;
 		for (TwitterUser myTwitterUser: myTwitterUsersList) {
 			User twitterUser = twitterUsers.get(i++);
-			result.add(new UserHolder(twitterUser, myTwitterUser));
+			result.add(new UserHolder(twitterUser, update(myTwitterUser, twitterUser, null)));
 		}
 		return result;
 	}

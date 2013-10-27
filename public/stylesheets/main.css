@@ -43,7 +43,7 @@ table.computers .header a {
     position: relative;
 }
 
-#actions #add {
+#actions #importAll {
     position: absolute;
     right: 0;
     top: 0;
@@ -64,12 +64,14 @@ table.computers .header a {
 
 .twitter_profile {
 	width: 354px;
-	float: left;
 }
 
 .twitter_data {
-	margin-left: 360px;
-	padding-left: 6px;
+	width: 150px;
+}
+
+.general_data {
+
 }
 
 .profile_image {
