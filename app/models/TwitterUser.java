@@ -1,9 +1,13 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
@@ -62,4 +66,7 @@ public class TwitterUser extends Model {
 	public String description;
 	
 	public static Finder<Long,TwitterUser> find = new Finder<Long,TwitterUser>(Long.class, TwitterUser.class); 
+	
+	@OneToMany(mappedBy="target", cascade=CascadeType.ALL)
+	public List<Action> actions = new ArrayList<Action>();
 }

@@ -2,12 +2,17 @@ package controllers;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import models.Action;
+import models.Action.ActionType;
+import models.Action.Direction;
+import models.Action.Service;
 import models.PagedUserHolderList;
 import models.TwitterUser;
 import models.TwitterUser.Category;
@@ -31,6 +36,7 @@ import views.html.list;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Page;
+import com.avaje.ebean.TxRunnable;
 import com.avaje.ebean.text.json.JsonContext;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -202,5 +208,59 @@ public class Application extends Controller {
     	twitterUser.save();
     	    
     	return ok("Updated user " + twitterUser.screenName + " with " + twitterUser.category);
+    }
+    
+    @BodyParser.Of(BodyParser.Json.class)
+    public static Result follow() {
+    	JsonNode json = request().body().asJson();
+    	Long id = json.get("id").asLong();
+    	final TwitterUser twitterUser = TwitterUser.find.byId(id);
+    	
+    	final Action action = new Action();
+    	action.service = Service.twitter;
+    	action.direction = Direction.send;
+    	action.actionType = ActionType.beFriend;
+    	
+    	action.scheduledFor = new Date();
+    	action.executed = false;
+    	
+    	twitterUser.actions.add(action);
+    	action.target = twitterUser;
+    	Ebean.execute(new TxRunnable() {
+			@Override
+			public void run() {
+		    	action.save();
+		    	twitterUser.save();	
+			}    		
+    	});
+    	    
+    	return ok("Created an follow action for user " + twitterUser.screenName);
+    }
+    
+    @BodyParser.Of(BodyParser.Json.class)
+    public static Result unFollow() {
+    	JsonNode json = request().body().asJson();
+    	Long id = json.get("id").asLong();
+    	final TwitterUser twitterUser = TwitterUser.find.byId(id);
+    	
+    	final Action action = new Action();
+    	action.service = Service.twitter;
+    	action.direction = Direction.send;
+    	action.actionType = ActionType.unFriend;
+    	
+    	action.scheduledFor = new Date();
+    	action.executed = false;
+    	
+    	twitterUser.actions.add(action);
+    	action.target = twitterUser;
+    	Ebean.execute(new TxRunnable() {
+			@Override
+			public void run() {
+		    	action.save();
+		    	twitterUser.save();	
+			}    		
+    	});
+    	    
+    	return ok("Created an unfollow action for user " + twitterUser.screenName);
     }
 }

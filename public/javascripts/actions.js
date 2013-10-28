@@ -43,16 +43,42 @@ jQuery(document).ready(function($) {
 		});
 	})
 	$('.twitterUnFollow').click(function() {
-		var id = $(this).parents('.twitterId').attr("twitterId");
-		$(this).prop('disabled', true);
-		console.log("unfollow " + id);
-		$(this).prop('disabled', false);
+		var id = $(this).parents('.twitterId').attr("twitterId")
+		var data = { id : id }
+		$(this).prop('disabled', true)
+		$.ajax({
+	        url: '/twitter/unfollow',
+	        type : 'POST',
+	        contentType : 'text/json',
+	        data: JSON.stringify(data),
+	        success: function(result, status, xhr) {
+	        	log(result)
+	        	$(this).prop('disabled', false)
+	        },
+	        error: function(errorThrown){
+	        	error(errorThrown);
+	        	$(this).prop('disabled', false)
+	        }
+		});
 	})
 	$('.twitterFollow').click(function() {
-		var id = $(this).parents('.twitterId').attr("twitterId");
-		$(this).prop('disabled', true);
-		console.log("follow " + id);
-		$(this).prop('disabled', false);
+		var id = $(this).parents('.twitterId').attr("twitterId")
+		var data = { id : id }
+		$(this).prop('disabled', true)
+		$.ajax({
+	        url: '/twitter/follow',
+	        type : 'POST',
+	        contentType : 'text/json',
+	        data: JSON.stringify(data),
+	        success: function(result, status, xhr) {
+	        	log(result)
+	        	$(this).prop('disabled', false)
+	        },
+	        error: function(errorThrown){
+	        	error(errorThrown);
+	        	$(this).prop('disabled', false)
+	        }
+		});
 	})
 	
 });

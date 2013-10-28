@@ -48,6 +48,11 @@
 		@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")
 		@helper.select(form("status"), options = Seq("neutral"->"Neutral", "wishlist" -> "Wishlist", "ignored"->"Ignored", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")
 		@helper.select(form("tier"), options = Seq("tier1"->"Tier 1", "tier2" -> "Tier 2", "tier3"->"Tier 3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")	
+		@if(user.getTwitterUser().actions.size()>0){
+			<span><a style="cursor: pointer;">Actions: @user.getTwitterUser().actions.size()</a></span>
+		}else{
+			<span>no Actions</span>
+		}
 	</td>
 </tr>
 

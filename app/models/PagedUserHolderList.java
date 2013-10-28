@@ -153,6 +153,8 @@ public class PagedUserHolderList extends ArrayList<PagedUserHolderList.UserHolde
 		myTwitterUser.followersCount = twitterUser.getFollowersCount();
 		myTwitterUser.description = twitterUser.getDescription();
 		myTwitterUser.save();
+		
+		TwitterUser.find.byId(myTwitterUser.id).actions.size();
 		return myTwitterUser;
 	}
 	
