@@ -36,12 +36,10 @@
             </thead>
             <tbody>
                 @for(userModel <- users) {
-                    <tr>
-                    	@{
-                    		val form = Form.form(classOf[TwitterUser]).fill(userModel.getTwitterUser());
-                    		user(userModel, form)                    	
-                    	}                                                	                                  
-                    </tr>
+                   	@{
+                   		val form = Form.form(classOf[TwitterUser]).fill(userModel.getTwitterUser());
+                   		user(userModel, form)                    	
+                   	}                                                	                                  
                 }
 
             </tbody>

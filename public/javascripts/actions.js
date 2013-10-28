@@ -23,9 +23,9 @@ jQuery(document).ready(function($) {
 	    });
 	})
 	$('.generalDataInput').change(function() {		
-		var generalDataElement = $(this).parent().parent().parent() 
-		generalDataElement.attr("style", "background:#FF0000;");
-		var data = { id : generalDataElement.find("input[name='id']").attr("value") }
+		var selects = $(this).parents('.general_data').find('select')
+		selects.prop('disabled', true)
+		var data = { id : $(this).parents('.twitterId').attr("twitterId") }
 		data[this.name] = this.value
 		$.ajax({
 	        url: '/twitter/update',
@@ -34,14 +34,27 @@ jQuery(document).ready(function($) {
 	        data: JSON.stringify(data),
 	        success: function(result, status, xhr) {
 	        	log(result)
-	        	generalDataElement.attr("style", "");
+	        	selects.prop('disabled', false)
 	        },
 	        error: function(errorThrown){
 	        	error(errorThrown);
-	        	generalDataElement.attr("style", "");
+	        	selects.prop('disabled', false)
 	        }
 		});
 	})
+	$('.twitterUnFollow').click(function() {
+		var id = $(this).parents('.twitterId').attr("twitterId");
+		$(this).prop('disabled', true);
+		console.log("unfollow " + id);
+		$(this).prop('disabled', false);
+	})
+	$('.twitterFollow').click(function() {
+		var id = $(this).parents('.twitterId').attr("twitterId");
+		$(this).prop('disabled', true);
+		console.log("follow " + id);
+		$(this).prop('disabled', false);
+	})
+	
 });
 
 

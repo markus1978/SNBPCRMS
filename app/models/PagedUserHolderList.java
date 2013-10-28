@@ -117,7 +117,9 @@ public class PagedUserHolderList extends ArrayList<PagedUserHolderList.UserHolde
 	}
 	
 	private static TwitterUser update(TwitterUser myTwitterUser, User twitterUser, Friendship twitterFriendship) {
+		boolean isNew = false;
 		if (myTwitterUser == null) {
+			isNew = true;
 			myTwitterUser = TwitterUser.find.byId(twitterUser.getId());
 			if (myTwitterUser == null) {
 				myTwitterUser = new TwitterUser();
@@ -128,13 +130,29 @@ public class PagedUserHolderList extends ArrayList<PagedUserHolderList.UserHolde
 		}
 		myTwitterUser.lastUpdated = new Date();
 		if (twitterFriendship != null) {
-			myTwitterUser.isFollower = twitterFriendship.isFollowedBy();
-			myTwitterUser.isFriend = twitterFriendship.isFollowing();
+			boolean isFollower = twitterFriendship.isFollowedBy();
+			if (isFollower != myTwitterUser.isFollower || isNew) {
+				myTwitterUser.isFollower = isFollower;
+				if (!isFollower) {
+					myTwitterUser.timesHasBeenFollower++;
+				} else {
+					myTwitterUser.isFollowerSince = new Date();
+				}
+			}
+			boolean isFriend = twitterFriendship.isFollowing();
+			if (isFriend != myTwitterUser.isFriend || isNew) {
+				myTwitterUser.isFriend = isFriend;
+				if (!isFriend) {
+					myTwitterUser.timesHasBeenFriend++;
+				} else {
+					myTwitterUser.isFriendSince = new Date();
+				}
+			}
 		}
 		myTwitterUser.friendsCount = twitterUser.getFriendsCount();
 		myTwitterUser.followersCount = twitterUser.getFollowersCount();
 		myTwitterUser.description = twitterUser.getDescription();
-		Ebean.save(myTwitterUser);
+		myTwitterUser.save();
 		return myTwitterUser;
 	}
 	
@@ -149,9 +167,6 @@ public class PagedUserHolderList extends ArrayList<PagedUserHolderList.UserHolde
 		
 		int i = 0;
 		for(TwitterUser myTwitterUser: myTwitterUsersList) {
-			if (myTwitterUser.category == Category.developer) {
-				System.out.println("###########################");
-			}
 			ids[i++] = myTwitterUser.id;
 		}
 		

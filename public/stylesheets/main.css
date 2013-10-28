@@ -62,33 +62,3 @@ table.computers .header a {
     color: #666;
 }
 
-.twitter_profile {
-	width: 354px;
-}
-
-.twitter_data {
-	width: 150px;
-}
-
-.general_data {
-
-}
-
-.profile_image {
-	width: 48px;
-	float: left;
-}
-
-.profile_texts {
-	width: 300px;
-	margin-left: 54px;
-	padding-left: 6px;
-}
-.profile_stats {
-	width: 330px;
-}
-.twitter_description {
-	margin-top: 2px;
-}
-
-

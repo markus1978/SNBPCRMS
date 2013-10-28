@@ -32,8 +32,16 @@ public class TwitterUser extends Model {
 	@Constraints.Required
 	public boolean isFollower;
 	
+	public Date isFollowerSince;
+	
+	public int timesHasBeenFollower = 0;
+	
 	@Constraints.Required
 	public boolean isFriend;
+	
+	public Date isFriendSince;
+	
+	public int timesHasBeenFriend = 0;
 
 	@Constraints.Required
 	public int followersCount;
