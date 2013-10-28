@@ -1,5 +1,7 @@
-@(user: models.PagedUserHolderList.UserHolder, form: Form[TwitterUser])
-<tr class="twitterId" twitterId="@user.getTwitterUser().id">
+@(user: models.TwitterUser.IUserHolder)
+@import utils.Let._
+@import play.data.Form
+<tr class="twitterDataHolder twitterId" twitterId="@user.getTwitterUser().id">
 	<td class="twitter_profile">
 		<div class="profile_conent">
 			<div class="profile_image">
@@ -33,26 +35,28 @@
 			@if(user.getTwitterUser().isFriend) { 
 				<span style="@{if (user.getTwitterUser().isFollower) "good" else "bad"}">friend</span>
 				<span>since [@user.getTwitterUser().isFriendSince.format("dd/mm/yy")]</span> 
-				<input type="button" class="twitterUnFollow btn primary" value="x">
+				<input type="button" class="twitterAction btn primary" value="x" url="@routes.Application.unFollow()">
 			} else { 
 				<span style="@{if (user.getTwitterUser().isFollower) "warn" else "neutral"}">NOT a friend</span>
 				@if(user.getTwitterUser().timesHasBeenFriend > 0) {
 					<span>but was friend for @user.getTwitterUser().timesHasBeenFriend times</span>	
 				}
-				<input type="button" class="twitterFollow btn primary" value="o">
+				<input type="button" class="twitterAction btn primary" value="o" url="@routes.Application.follow()">
 			}
 		</div>
 	</td>
 	<td class="general_data">
-		<input type="hidden" name="id" value="@user.getTwitterUser().id">
-		@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")
-		@helper.select(form("status"), options = Seq("neutral"->"Neutral", "wishlist" -> "Wishlist", "ignored"->"Ignored", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")
-		@helper.select(form("tier"), options = Seq("tier1"->"Tier 1", "tier2" -> "Tier 2", "tier3"->"Tier 3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")	
-		@if(user.getTwitterUser().actions.size()>0){
-			<span><a style="cursor: pointer;">Actions: @user.getTwitterUser().actions.size()</a></span>
-		}else{
-			<span>no Actions</span>
-		}
+		@let(Form.form(classOf[TwitterUser]).fill(user.getTwitterUser())){ form =>
+			<input type="hidden" name="id" value="@user.getTwitterUser().id">
+			@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")
+			@helper.select(form("status"), options = Seq("neutral"->"Neutral", "wishlist" -> "Wishlist", "ignored"->"Ignored", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")
+			@helper.select(form("tier"), options = Seq("tier1"->"Tier 1", "tier2" -> "Tier 2", "tier3"->"Tier 3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")	
+			@if(user.getTwitterUser().actions.size()>0){
+				<span><a style="cursor: pointer;">Actions: @user.getTwitterUser().actions.size()</a></span>
+			}else{
+				<span>no Actions</span>
+			}
+		}			
 	</td>
 </tr>
 

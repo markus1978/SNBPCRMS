@@ -7,7 +7,7 @@ function error(event) {
 }
 
 
-jQuery(document).ready(function($) {
+function jQueryFunctions($) {
 	$('#importAll').click(function() {			
 	    $.ajax({
 	        url: '/twitter/importAll',
@@ -22,7 +22,7 @@ jQuery(document).ready(function($) {
 	        }
 	    });
 	})
-	$('.generalDataInput').change(function() {		
+	$('#twitterUserHolders').on('change', '.generalDataInput', function() {		
 		var selects = $(this).parents('.general_data').find('select')
 		selects.prop('disabled', true)
 		var data = { id : $(this).parents('.twitterId').attr("twitterId") }
@@ -42,47 +42,32 @@ jQuery(document).ready(function($) {
 	        }
 		});
 	})
-	$('.twitterUnFollow').click(function() {
+	$('#twitterUserHolders').on('click', '.twitterAction', function() {
+		var twitterDataHolder = $(this).parents('.twitterDataHolder')
 		var id = $(this).parents('.twitterId').attr("twitterId")
 		var data = { id : id }
-		$(this).prop('disabled', true)
+		var button = $(this)
+		button.prop('disabled', true)
+		console.log("Action ...")
 		$.ajax({
-	        url: '/twitter/unfollow',
+	        url: button.attr("url"),
 	        type : 'POST',
 	        contentType : 'text/json',
 	        data: JSON.stringify(data),
 	        success: function(result, status, xhr) {
-	        	log(result)
-	        	$(this).prop('disabled', false)
+	        	log('Follow successfully answered by server.')
+	        	button.prop('disabled', false)
+	        	twitterDataHolder.replaceWith(result);
 	        },
 	        error: function(errorThrown){
 	        	error(errorThrown);
-	        	$(this).prop('disabled', false)
+	        	button.prop('disabled', false)
 	        }
 		});
 	})
-	$('.twitterFollow').click(function() {
-		var id = $(this).parents('.twitterId').attr("twitterId")
-		var data = { id : id }
-		$(this).prop('disabled', true)
-		$.ajax({
-	        url: '/twitter/follow',
-	        type : 'POST',
-	        contentType : 'text/json',
-	        data: JSON.stringify(data),
-	        success: function(result, status, xhr) {
-	        	log(result)
-	        	$(this).prop('disabled', false)
-	        },
-	        error: function(errorThrown){
-	        	error(errorThrown);
-	        	$(this).prop('disabled', false)
-	        }
-		});
-	})
-	
-});
+};
 
+jQuery(document).ready(jQueryFunctions)
 
 function pullLog() {
 	$.ajax({

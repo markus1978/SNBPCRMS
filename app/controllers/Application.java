@@ -16,8 +16,8 @@ import models.Action.Service;
 import models.PagedUserHolderList;
 import models.TwitterUser;
 import models.TwitterUser.Category;
+import models.TwitterUser.IUserHolder;
 import models.TwitterUser.Tier;
-import play.data.Form;
 import play.db.ebean.Model.Finder;
 import play.libs.Akka;
 import play.libs.Json;
@@ -33,11 +33,11 @@ import twitter4j.User;
 import twitter4j.auth.AccessToken;
 import views.html.index;
 import views.html.list;
+import views.html.user;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Page;
 import com.avaje.ebean.TxRunnable;
-import com.avaje.ebean.text.json.JsonContext;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class Application extends Controller {
@@ -212,6 +212,14 @@ public class Application extends Controller {
     
     @BodyParser.Of(BodyParser.Json.class)
     public static Result follow() {
+    	try {
+    		return ok(user.render(createAction(ActionType.beFriend)));
+    	} catch (Exception e) {
+    		return internalServerError(e.getMessage());
+    	}
+    }
+    
+    private static IUserHolder createAction(ActionType actionType) throws TwitterException {    	
     	JsonNode json = request().body().asJson();
     	Long id = json.get("id").asLong();
     	final TwitterUser twitterUser = TwitterUser.find.byId(id);
@@ -225,42 +233,16 @@ public class Application extends Controller {
     	action.executed = false;
     	
     	twitterUser.actions.add(action);
-    	action.target = twitterUser;
-    	Ebean.execute(new TxRunnable() {
-			@Override
-			public void run() {
-		    	action.save();
-		    	twitterUser.save();	
-			}    		
-    	});
-    	    
-    	return ok("Created an follow action for user " + twitterUser.screenName);
+    	User t4jUser = twitter().showUser(id);        	
+    	return TwitterUser.createHolder(twitterUser, t4jUser, null);
     }
     
     @BodyParser.Of(BodyParser.Json.class)
     public static Result unFollow() {
-    	JsonNode json = request().body().asJson();
-    	Long id = json.get("id").asLong();
-    	final TwitterUser twitterUser = TwitterUser.find.byId(id);
-    	
-    	final Action action = new Action();
-    	action.service = Service.twitter;
-    	action.direction = Direction.send;
-    	action.actionType = ActionType.unFriend;
-    	
-    	action.scheduledFor = new Date();
-    	action.executed = false;
-    	
-    	twitterUser.actions.add(action);
-    	action.target = twitterUser;
-    	Ebean.execute(new TxRunnable() {
-			@Override
-			public void run() {
-		    	action.save();
-		    	twitterUser.save();	
-			}    		
-    	});
-    	    
-    	return ok("Created an unfollow action for user " + twitterUser.screenName);
+    	try {
+    		return ok(user.render(createAction(ActionType.unFriend)));
+    	} catch (Exception e) {
+    		return internalServerError(e.getMessage());
+    	}
     }
 }
