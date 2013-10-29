@@ -6,25 +6,6 @@ function error(event) {
 	document.getElementById("logs").innerHTML = '<p style="margin-bottom: 0px; color: FF0000;">[' + new Date().toLocaleString() + '] ' + event + '</p>';
 }
 
-/*
-$(window).scroll(function() {
-	timeoutHandle = setTimeout(function() {
-		console.log("Alert");
-		if ($(window).scrollTop() + $(window).height() > $(document).height() * .75) {  
-			console.log("HELLO")
-		}
-    }, 100);
-})
-*/
-
-$(window).scroll(function() { 
-	setTimeout(function() {	
-		if ($(window).scrollTop() + $(window).height() > $(document).height() * .75) {   
-			loadNextPage()
-		}
-	}, 100)
-})
-
 function loadNextPage() {
 	var nextPage = $(document).find('#nextPage')
 	if (typeof nextPage != 'undefined') {
@@ -47,7 +28,16 @@ function loadNextPage() {
 	}
 }
 
-function jQueryFunctions($) {
+
+$(window).scroll(function() { 
+	setTimeout(function() {	
+		if ($(window).scrollTop() + $(window).height() > $(document).height() * .75) {   
+			loadNextPage()
+		}
+	}, 100)
+})
+
+$(document).ready(function($) {
 	$('#importAll').click(function() {			
 	    $.ajax({
 	        url: '/twitter/importAll',
@@ -88,7 +78,6 @@ function jQueryFunctions($) {
 		var data = { id : id }
 		var button = $(this)
 		button.prop('disabled', true)
-		console.log("Action ...")
 		$.ajax({
 	        url: button.attr("url"),
 	        type : 'POST',
@@ -104,12 +93,8 @@ function jQueryFunctions($) {
 	        	button.prop('disabled', false)
 	        }
 		});
-	})
-};
-
-jQuery(document).ready(jQueryFunctions)
-
-
+	})	
+})
 
 function pullLog() {
 	$.ajax({
