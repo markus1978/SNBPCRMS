@@ -9,7 +9,7 @@ import models.Action;
 import models.Action.ActionType;
 import models.Action.Direction;
 import models.Action.Service;
-import models.PagedUserHolderList;
+import models.TwitterUserPage;
 import models.TwitterUser;
 import models.TwitterUser.Category;
 import models.TwitterUser.IUserHolder;
@@ -94,7 +94,7 @@ public class Application extends Controller {
     
     public static Result users(String query, long cursor) {
     	try {
-    		PagedUserHolderList result = evaluateQuery(query, cursor);
+    		TwitterUserPage result = evaluateQuery(query, cursor);
     		if (result == null) {
     			return ok(index.render("Could not evaluate query '" + query + "'"));
     		}
@@ -107,7 +107,7 @@ public class Application extends Controller {
     
     public static Result ajaxUsers(String query, long cursor) {
     	try {
-    		PagedUserHolderList result = evaluateQuery(query, cursor);
+    		TwitterUserPage result = evaluateQuery(query, cursor);
     		if (result == null) {
     			return internalServerError("Could not evaluate query.");
     		}
@@ -117,8 +117,8 @@ public class Application extends Controller {
     	}
     }
     
-    private static PagedUserHolderList evaluateQuery(String query, long cursor) throws TwitterException {
-    	PagedUserHolderList result = null;
+    private static TwitterUserPage evaluateQuery(String query, long cursor) throws TwitterException {
+    	TwitterUserPage result = null;
 		if (query.startsWith("friends:")) {
 			String screenName = query.substring("friends:".length()).trim();
 			result = friends(screenName, cursor);
@@ -143,7 +143,7 @@ public class Application extends Controller {
     	            	try {
     	            		int userCount = 0;
 	    	            	long cursor = -1;
-	    	            	PagedUserHolderList result = evaluateQuery(query, cursor);
+	    	            	TwitterUserPage result = evaluateQuery(query, cursor);
 	    	            	userCount += result.size();
 	    	            	log.add("Imported " + userCount + " users.");
 	    	            	while (result.hasNext()) {
@@ -161,21 +161,21 @@ public class Application extends Controller {
 	    return ok("initiated import all for: '" + query + "'");
     }
     
-    private static PagedUserHolderList friends(String screenName, long cursor) throws TwitterException {
+    private static TwitterUserPage friends(String screenName, long cursor) throws TwitterException {
     	User twitterUser = twitter().showUser(screenName);
 		PagableResponseList<User> pagableTwitterUsers = twitter().getFriendsList(screenName, cursor);
-		PagedUserHolderList userList = PagedUserHolderList.create(twitter(), twitterUser, pagableTwitterUsers, twitterUser.getFriendsCount());
+		TwitterUserPage userList = TwitterUserPage.create(twitter(), pagableTwitterUsers, twitterUser.getFriendsCount());
 		return userList;
     }
     
-    private static PagedUserHolderList followers(String screenName, long cursor) throws TwitterException {
+    private static TwitterUserPage followers(String screenName, long cursor) throws TwitterException {
     	User twitterUser = twitter().showUser(screenName);
 		PagableResponseList<User> pagableTwitterUsers = twitter().getFollowersList(screenName, cursor);
-		PagedUserHolderList userList = PagedUserHolderList.create(twitter(), twitterUser, pagableTwitterUsers, twitterUser.getFollowersCount());
+		TwitterUserPage userList = TwitterUserPage.create(twitter(), pagableTwitterUsers, twitterUser.getFollowersCount());
 		return userList;
     }
     
-    private static PagedUserHolderList sql(String sql, long cursor) throws TwitterException {
+    private static TwitterUserPage sql(String sql, long cursor) throws TwitterException {
     	Finder<Long, TwitterUser> finder = new Finder<Long, TwitterUser>(Long.class, TwitterUser.class);
     	
     	Page<TwitterUser> page = null;
@@ -188,7 +188,7 @@ public class Application extends Controller {
     		return null;
     	}
     	
-		PagedUserHolderList userList = PagedUserHolderList.create(twitter(), twitter().showUser("mscheidgen"), page);
+		TwitterUserPage userList = TwitterUserPage.create(twitter(), twitter().showUser("mscheidgen"), page);
 		return userList;
     }
     
@@ -240,7 +240,7 @@ public class Application extends Controller {
     	
     	twitterUser.actions.add(action);
     	User t4jUser = twitter().showUser(id);        	
-    	return TwitterUser.createHolder(twitterUser, t4jUser, null);
+    	return TwitterUser.createHolder(twitter, twitterUser, t4jUser);
     }
     
     @BodyParser.Of(BodyParser.Json.class)

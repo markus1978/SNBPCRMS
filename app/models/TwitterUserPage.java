@@ -3,7 +3,6 @@ package models;
 import java.util.ArrayList;
 import java.util.List;
 
-import twitter4j.Friendship;
 import twitter4j.PagableResponseList;
 import twitter4j.ResponseList;
 import twitter4j.Twitter;
@@ -12,7 +11,7 @@ import twitter4j.User;
 
 import com.avaje.ebean.Page;
 
-public class PagedUserHolderList extends ArrayList<TwitterUser.IUserHolder> {
+public class TwitterUserPage extends ArrayList<TwitterUser.IUserHolder> {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -20,31 +19,21 @@ public class PagedUserHolderList extends ArrayList<TwitterUser.IUserHolder> {
 	private Long prev;
 	private int totalSize;
 	
-	public static PagedUserHolderList create(Twitter twitter, twitter4j.User user, PagableResponseList<twitter4j.User> pagableTwitterUsers, int totalSize) throws TwitterException {
-		PagedUserHolderList result = new PagedUserHolderList(
+	public static TwitterUserPage create(Twitter twitter, PagableResponseList<twitter4j.User> pagableTwitterUsers, int totalSize) throws TwitterException {		
+		TwitterUserPage result = new TwitterUserPage(
 				pagableTwitterUsers.hasPrevious() ? pagableTwitterUsers.getPreviousCursor() : null,
 				pagableTwitterUsers.hasNext() ? pagableTwitterUsers.getNextCursor() : null, 
 				totalSize);
-		long[] ids = new long[pagableTwitterUsers.size()];
-		int i = 0;
-		for (twitter4j.User twitterUser: pagableTwitterUsers) {
-			ids[i++] = twitterUser.getId();
-		}
 		
-		ResponseList<Friendship> friendships = twitter.lookupFriendships(ids);
-		i = 0;
-		
-		for (twitter4j.User twitterUser: pagableTwitterUsers) {
-			Friendship twitterFriendship = friendships.get(i++);
-			
-			result.add(TwitterUser.createHolder(null, twitterUser, twitterFriendship));
+		for (twitter4j.User twitterUser: pagableTwitterUsers) {			
+			result.add(TwitterUser.createHolder(twitter, null, twitterUser));
 		}
 		
 		return result;
 	}
 	
-	public static PagedUserHolderList create(Twitter twitter, twitter4j.User user, Page<TwitterUser> myTwitterUsers) throws TwitterException {
-		PagedUserHolderList result = new PagedUserHolderList(
+	public static TwitterUserPage create(Twitter twitter, twitter4j.User user, Page<TwitterUser> myTwitterUsers) throws TwitterException {
+		TwitterUserPage result = new TwitterUserPage(
 				myTwitterUsers.hasPrev() ? (long)myTwitterUsers.getPageIndex() -1 : null,
 				myTwitterUsers.hasNext() ? (long)myTwitterUsers.getPageIndex() +1 : null, 
 				myTwitterUsers.getTotalPageCount()*20);
@@ -61,12 +50,12 @@ public class PagedUserHolderList extends ArrayList<TwitterUser.IUserHolder> {
 		i = 0;
 		for (TwitterUser myTwitterUser: myTwitterUsersList) {
 			User twitterUser = twitterUsers.get(i++);
-			result.add(TwitterUser.createHolder(myTwitterUser, twitterUser, null));
+			result.add(TwitterUser.createHolder(twitter, myTwitterUser, twitterUser));
 		}
 		return result;
 	}
 	
-	private PagedUserHolderList(Long prev, Long next, int totalSize) {
+	private TwitterUserPage(Long prev, Long next, int totalSize) {
 		this.next = next;
 		this.prev = prev;
 		this.totalSize = totalSize;

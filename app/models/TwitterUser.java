@@ -11,7 +11,8 @@ import javax.persistence.OneToMany;
 
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
-import twitter4j.Friendship;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
 import twitter4j.User;
 
 @Entity
@@ -140,11 +141,11 @@ public class TwitterUser extends Model {
 		}
 	}
 	
-	public static IUserHolder createHolder(TwitterUser existingTwitterUser, User t4jUser, Friendship t4jFriendship) {
-		return new UserHolder(t4jUser, update(existingTwitterUser, t4jUser, t4jFriendship));
+	public static IUserHolder createHolder(Twitter twitter, TwitterUser existingTwitterUser, User t4jUser) throws TwitterException {
+		return new UserHolder(t4jUser, update(twitter, existingTwitterUser, t4jUser));
 	}
 	
-	private static TwitterUser update(TwitterUser existingTwitterUser, User t4jUser, Friendship t4jFriendship) {
+	private static TwitterUser update(Twitter twitter, TwitterUser existingTwitterUser, User t4jUser) throws TwitterException {
 		boolean isNew = false;
 		if (existingTwitterUser == null) {
 			isNew = true;
@@ -157,30 +158,31 @@ public class TwitterUser extends Model {
 			}
 		}
 		existingTwitterUser.lastUpdated = new Date();
-		if (t4jFriendship != null) {
-			boolean isFollower = t4jFriendship.isFollowedBy();
-			if (isFollower != existingTwitterUser.isFollower || isNew) {
-				existingTwitterUser.isFollower = isFollower;
-				if (!isFollower) {
-					if (!isNew) {
-						existingTwitterUser.timesHasBeenFollower++;
-					}
-				} else {
-					existingTwitterUser.isFollowerSince = new Date();
+
+		TwitterMe me = TwitterMe.instance(twitter);
+		boolean isFollower = me.isFollower(existingTwitterUser);
+		if (isFollower != existingTwitterUser.isFollower || isNew) {
+			existingTwitterUser.isFollower = isFollower;
+			if (!isFollower) {
+				if (!isNew) {
+					existingTwitterUser.timesHasBeenFollower++;
 				}
-			}
-			boolean isFriend = t4jFriendship.isFollowing();
-			if (isFriend != existingTwitterUser.isFriend || isNew) {
-				existingTwitterUser.isFriend = isFriend;
-				if (!isFriend) {
-					if (!isNew) {
-						existingTwitterUser.timesHasBeenFriend++;
-					}
-				} else {
-					existingTwitterUser.isFriendSince = new Date();
-				}
+			} else {
+				existingTwitterUser.isFollowerSince = new Date();
 			}
 		}
+		boolean isFriend = me.isFriend(existingTwitterUser);
+		if (isFriend != existingTwitterUser.isFriend || isNew) {
+			existingTwitterUser.isFriend = isFriend;
+			if (!isFriend) {
+				if (!isNew) {
+					existingTwitterUser.timesHasBeenFriend++;
+				}
+			} else {
+				existingTwitterUser.isFriendSince = new Date();
+			}
+		}
+
 		existingTwitterUser.friendsCount = t4jUser.getFriendsCount();
 		existingTwitterUser.followersCount = t4jUser.getFollowersCount();
 		existingTwitterUser.description = t4jUser.getDescription();
