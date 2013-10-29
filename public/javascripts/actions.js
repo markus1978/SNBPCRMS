@@ -6,6 +6,46 @@ function error(event) {
 	document.getElementById("logs").innerHTML = '<p style="margin-bottom: 0px; color: FF0000;">[' + new Date().toLocaleString() + '] ' + event + '</p>';
 }
 
+/*
+$(window).scroll(function() {
+	timeoutHandle = setTimeout(function() {
+		console.log("Alert");
+		if ($(window).scrollTop() + $(window).height() > $(document).height() * .75) {  
+			console.log("HELLO")
+		}
+    }, 100);
+})
+*/
+
+$(window).scroll(function() { 
+	setTimeout(function() {	
+		if ($(window).scrollTop() + $(window).height() > $(document).height() * .75) {   
+			loadNextPage()
+		}
+	}, 100)
+})
+
+function loadNextPage() {
+	var nextPage = $(document).find('#nextPage')
+	if (typeof nextPage != 'undefined') {
+		if (nextPage.attr('isLoading') == 'false') {
+			nextPage.attr('isLoading', 'true')
+			$.ajax({
+				url: nextPage.attr('url'),
+				success: function(result) {
+					log('Loaded next page for query')
+					nextPage.attr('isLoading', 'false')
+					nextPage.replaceWith(result)
+				},
+			    error: function(xhr, status, error) {
+			    	nextPage.attr('isLoading', 'false')
+			    	nextPage.removeAttr('id')
+			    	nextPage.children(':first').html('<span class="bad">Could not load next page : ' + error + '. Try reloading.</span>')
+			    }
+			})
+		}
+	}
+}
 
 function jQueryFunctions($) {
 	$('#importAll').click(function() {			
@@ -68,6 +108,8 @@ function jQueryFunctions($) {
 };
 
 jQuery(document).ready(jQueryFunctions)
+
+
 
 function pullLog() {
 	$.ajax({

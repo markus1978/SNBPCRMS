@@ -1,0 +1,12 @@
+@(query: String, users: models.PagedUserHolderList)
+
+@for(userModel <- users) {
+	@user(userModel)                                               	                                 
+}
+@if(users.hasNext()){
+	<tr id="nextPage" url="@routes.Application.ajaxUsers(query, users.getNextCursor())" isLoading="false">
+		<td colspan="3">
+			loading ...
+		</td>
+	</tr>                
+} 	   

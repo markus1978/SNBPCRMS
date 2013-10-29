@@ -35,38 +35,9 @@
                 </tr>
             </thead>
             <tbody id="twitterUserHolders">
-                @for(userModel <- users) {
-                	@user(userModel)                   	                                                	                                 
-                }
+            	@userPage(query, users)                
             </tbody>
-        </table>
-
-        <div id="pagination" class="pagination">
-            <ul>
-                @if(users.hasPrev()) {
-                    <li class="prev">
-                        <a href="@routes.Application.users(query, users.getPrevCursor())">&larr; Previous</a>
-                    </li>
-                } else {
-                    <li class="prev disabled">
-                        <a>&larr; Previous</a>
-                    </li>
-                }
-                <li class="current">
-                    <a>not available</a>
-                </li>
-                @if(users.hasNext()) {
-                    <li class="next">
-                        <a href="@routes.Application.users(query, users.getNextCursor())">Next &rarr;</a>
-                    </li>
-                } else {
-                    <li class="next disabled">
-                        <a>Next &rarr;</a>
-                    </li>
-                }
-            </ul>
-        </div>
-        
+        </table>        
     }
         
 }

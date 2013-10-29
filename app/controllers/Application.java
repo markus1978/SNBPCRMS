@@ -111,6 +111,18 @@ public class Application extends Controller {
     	}
     }
     
+    public static Result ajaxUsers(String query, long cursor) {
+    	try {
+    		PagedUserHolderList result = evaluateQuery(query, cursor);
+    		if (result == null) {
+    			return internalServerError("Could not evaluate query.");
+    		}
+    		return ok(views.html.userPage.render(query, result));
+    	} catch (TwitterException e) {
+    		return internalServerError("Twitter exception: " + e.getMessage());
+    	}
+    }
+    
     private static PagedUserHolderList evaluateQuery(String query, long cursor) throws TwitterException {
     	PagedUserHolderList result = null;
 		if (query.startsWith("friends:")) {
