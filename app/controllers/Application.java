@@ -9,11 +9,11 @@ import models.Action;
 import models.Action.ActionType;
 import models.Action.Direction;
 import models.Action.Service;
-import models.TwitterUserPage;
 import models.TwitterUser;
 import models.TwitterUser.Category;
 import models.TwitterUser.IUserHolder;
 import models.TwitterUser.Tier;
+import models.TwitterUserPage;
 import play.db.ebean.Model.Finder;
 import play.libs.Akka;
 import play.libs.Json;
@@ -22,6 +22,8 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import scala.concurrent.duration.Duration;
 import twitter4j.PagableResponseList;
+import twitter4j.Paging;
+import twitter4j.ResponseList;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -115,6 +117,26 @@ public class Application extends Controller {
     	} catch (TwitterException e) {
     		return internalServerError("Twitter exception: " + e.getMessage());
     	}
+    }
+    
+    public static Result ajaxTimeline(long userId, long maxId) {
+    	try {
+    		ResponseList<twitter4j.Status> userTimelinePage = null;
+    		if (maxId == -1) {
+    			userTimelinePage = twitter().getUserTimeline(userId);
+    		} else {
+    			Paging paging = new Paging();
+    			paging.setMaxId(maxId);
+    			userTimelinePage = twitter().getUserTimeline(paging);
+    		}
+    		return ok(views.html.timelinePage.render(userId, userTimelinePage));
+    	} catch (TwitterException e) {
+    		return internalServerError("Twitter exception: " + e.getMessage());
+    	}
+    }
+    
+    public static Result ajaxActions(long id) {    	
+    	return ok(views.html.actions.render(TwitterUser.find.byId(id).actions));
     }
     
     private static TwitterUserPage evaluateQuery(String query, long cursor) throws TwitterException {
@@ -216,37 +238,54 @@ public class Application extends Controller {
     	return ok("Updated user " + twitterUser.screenName + " with " + twitterUser.category);
     }
     
-    @BodyParser.Of(BodyParser.Json.class)
-    public static Result follow() {
+    public static Result follow(long id) {
     	try {
-    		return ok(user.render(createAction(ActionType.beFriend)));
+    		return ok(user.render(createAction(id, ActionType.beFriend, null)));
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
     	}
     }
     
-    private static IUserHolder createAction(ActionType actionType) throws TwitterException {    	
-    	JsonNode json = request().body().asJson();
-    	Long id = json.get("id").asLong();
+    public interface Callback<T> {
+    	void invoke(T arg);
+    }
+    
+    private static IUserHolder createAction(long id, ActionType actionType, Callback<Action> editAction) throws TwitterException {    	
     	final TwitterUser twitterUser = TwitterUser.find.byId(id);
     	
     	final Action action = new Action();
     	action.service = Service.twitter;
     	action.direction = Direction.send;
-    	action.actionType = ActionType.beFriend;
+    	action.actionType = actionType;
     	
     	action.scheduledFor = new Date();
     	action.executed = false;
+		
+    	if (editAction != null) {
+    		editAction.invoke(action);
+    	}
     	
     	twitterUser.actions.add(action);
     	User t4jUser = twitter().showUser(id);        	
     	return TwitterUser.createHolder(twitter, twitterUser, t4jUser);
     }
     
-    @BodyParser.Of(BodyParser.Json.class)
-    public static Result unFollow() {
+    public static Result unFollow(long id) {
     	try {
-    		return ok(user.render(createAction(ActionType.unFriend)));
+    		return ok(user.render(createAction(id, ActionType.unFriend, null)));
+    	} catch (Exception e) {
+    		return internalServerError(e.getMessage());
+    	}
+    }
+    
+    public static Result retweet(long userId, final long statusId) {
+    	try {
+    		return ok(user.render(createAction(userId, ActionType.retweet, new Callback<Action>() {
+				@Override
+				public void invoke(Action arg) {
+					arg.message = Long.toString(statusId);
+				}    			
+    		})));
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
     	}

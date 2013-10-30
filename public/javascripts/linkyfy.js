@@ -26,3 +26,9 @@ function linkifyAll(className) {
 	    element.innerHTML = linkify(element.innerHTML);
 	}
 }
+
+function linkifyAll(root, className) {
+	jQuery.each($(root).find("."+className), function(index, element) {
+		$(element).html(linkify($(element).text()))
+	})	
+}

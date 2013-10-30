@@ -1,25 +1,36 @@
 @(user: models.TwitterUser.IUserHolder)
 @import utils.Let._
 @import play.data.Form
-<tr class="twitterDataHolder twitterId" twitterId="@user.getTwitterUser().id">
-	<td class="twitter_profile">
-		<div class="profile_conent">
-			<div class="profile_image">
+<tr class="twitter-data-holder twitter-id" twitterId="@user.getTwitterUser().id">
+	<td class="twitter-profile">
+		<div class="twitter-profile-conent">
+			<div class="twitter-profile-image">
 				<img src="@user.getImageURL()"></img>
 			</div>
-			<div class="profile_texts">
+			<div class="twitter-profile-texts">
 				<a target="new" href="@user.getProfileURL()">@user.getName()</a>&nbsp;<span style="color: #AAAAAA">@@@user.getScreenName()</span>
-				<p class="twitter_description">@user.getDescription()</p>
+				<p class="twitter-profile-description linkify">@user.getDescription()</p>
 			</div>
 		</div>
-		<div class="profile_stats">
-			tweets: <a href="@user.getProfileURL()">@user.getTweetCount()</a>,&nbsp;
+		<div class="twitter-profile-stats">
+			tweets: <a href="#twitter-timeline-modal@user.getTwitterUser().id" role="button" class="load-modal-data-ajax-action" url="@routes.Application.ajaxTimeline(user.getTwitterUser().id,-1)" data-toggle="modal">@user.getTweetCount()</a>,&nbsp; 
+			<!-- Modal -->
+			<div id="twitter-timeline-modal@user.getTwitterUser().id" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="twitter-time-line-model-label" aria-hidden="true">
+				<div class="modal-header">
+			    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			    	<h3 id="twitter-time-line-model-label">Timeline of @@@user.getTwitterUser().screenName</h3>
+			  	</div>
+			  	<div class="modal-body twitter-timeline">
+			  	</div>
+			</div>
+			
 			follows: <a href="@routes.Application.users("friends: " + user.getScreenName(), -1)">@user.getFriendsCount()</a>,&nbsp;
 			followers: <a href="@routes.Application.users("followers: " + user.getScreenName(), -1)">@user.getFollowersCount()</a><br/>
 			<span class="unimportant">[@user.getTwitterUser().lastUpdated.format("HH:mm dd/mm/yy")]</span>
+			<a class="btn tiny-btn">m</a>
 		</div> 
 	</td>
-	<td class="twitter_data">
+	<td class="twitter-profile-data">
 		<div>
 			@if(user.getTwitterUser().isFollower) { 
 				<span class="@{if (user.getTwitterUser().isFriend) "good" else "warn"}">follows</span> 
@@ -35,27 +46,46 @@
 			@if(user.getTwitterUser().isFriend) { 
 				<span style="@{if (user.getTwitterUser().isFollower) "good" else "bad"}">friend</span>
 				<span>since [@user.getTwitterUser().isFriendSince.format("dd/mm/yy")]</span> 
-				<input type="button" class="twitterAction btn primary" value="x" url="@routes.Application.unFollow()">
+				<a class="reload-ajax-action tiny-btn btn" message="Follow" url="@routes.Application.unFollow(user.getTwitterUser().id)">x</a>
 			} else { 
 				<span style="@{if (user.getTwitterUser().isFollower) "warn" else "neutral"}">NOT a friend</span>
 				@if(user.getTwitterUser().timesHasBeenFriend > 0) {
 					<span>but was friend for @user.getTwitterUser().timesHasBeenFriend times</span>	
 				}
-				<input type="button" class="twitterAction btn primary" value="o" url="@routes.Application.follow()">
+				<a class="reload-ajax-action tiny-btn btn" message="Un-follow" url="@routes.Application.follow(user.getTwitterUser().id)">o</a>
 			}
 		</div>
 	</td>
-	<td class="general_data">
+	<td class="general-data">
 		@let(Form.form(classOf[TwitterUser]).fill(user.getTwitterUser())){ form =>
-			<input type="hidden" name="id" value="@user.getTwitterUser().id">
-			@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")
-			@helper.select(form("status"), options = Seq("neutral"->"Neutral", "wishlist" -> "Wishlist", "ignored"->"Ignored", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")
-			@helper.select(form("tier"), options = Seq("tier1"->"Tier 1", "tier2" -> "Tier 2", "tier3"->"Tier 3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "generalDataInput")	
+			<div>
+				<input type="hidden" name="id" value="@user.getTwitterUser().id">
+				@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "general-data-input")
+				@helper.select(form("status"), options = Seq("neutral"->"Neutral", "wishlist" -> "Wishlist", "ignored"->"Ignored", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "general-data-input")
+				@helper.select(form("tier"), options = Seq("tier1"->"Tier 1", "tier2" -> "Tier 2", "tier3"->"Tier 3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "general-data-input")
+			</div>
+			<div>	
 			@if(user.getTwitterUser().actions.size()>0){
-				<span><a style="cursor: pointer;">Actions: @user.getTwitterUser().actions.size()</a></span>
+				Actions: <a href="#general-data-actions-modal@user.getTwitterUser().id" role="button" class="load-modal-data-ajax-action" url="@routes.Application.ajaxActions(user.getTwitterUser().id)" data-toggle="modal">@user.getTwitterUser().actions.size()</a>:&nbsp;
+				<!-- Modal -->
+				<div id="general-data-actions-modal@user.getTwitterUser().id" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="general-data-actions-modal-label" aria-hidden="true">
+					<div class="modal-header">
+				    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				    	<h3 id="general-data-actions-modal">Actions with @@@user.getTwitterUser().screenName</h3>
+				  	</div>
+				  	<div class="modal-body">
+				  	</div>
+				</div>
+				@for(action <- user.getTwitterUser().actions.reverse.splitAt(5)._1){
+					<span class="btn tiny-btn disabled">@models.Action.abr(action.actionType)</span>
+				}
+				@if(user.getTwitterUser().actions.size()>5) {
+					<span>...</span>	
+				}
 			}else{
 				<span>no Actions</span>
 			}
+			</div>
 		}			
 	</td>
 </tr>

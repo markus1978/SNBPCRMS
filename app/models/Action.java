@@ -12,9 +12,25 @@ import play.db.ebean.Model;
 @Entity
 public class Action extends Model {
 
+	private static final long serialVersionUID = 1L;
+
 	public enum ActionType { beFriend, unFriend, message, retweet };
 	public enum Service { twitter };
 	public enum Direction { receive, send, global };
+	
+	public static String abr(ActionType type) {
+		if (type == ActionType.beFriend) {
+			return "o";
+		} else if (type == ActionType.unFriend) {
+			return "x";
+		} else if (type == ActionType.message) {
+			return "m";
+		} else if (type == ActionType.retweet) {
+			return "R";
+		} else {
+			return "ERROR";
+		}
+	}
 	
 	@Id
 	public long id;

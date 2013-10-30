@@ -1,0 +1,29 @@
+@(id: Long, timelinePage: twitter4j.ResponseList[twitter4j.Status])
+@import utils.Let._
+<table class="table table-striped table-bordered table-hover">
+	<tbody>
+		@for(tweet <- timelinePage) {
+			@let(tweet.getUser()){user=>
+				<tr><td>
+					<div>
+						<div class="twitter-tweet-image">
+							<img src="@user.getProfileImageURL()"></img>
+						</div>			
+						<div class="twitter-tweet-texts">
+							<a target="new" href="http://twitter.com/@user.getScreenName()">@user.getName()</a>&nbsp;<span style="color: #AAAAAA">@@@user.getScreenName()</span>
+							<p class="twitter-tweet-text linkify">@tweet.getText()</p>
+						</div>
+					</div> 		
+					<div class="twitter-tweet-data">
+						@if(tweet.isRetweeted()) {
+							<span class="twitter-tweet-retweeted">[R]</span>
+						}
+						<span class="twitter-tweet-date">[@tweet.getCreatedAt().format("dd/mm/yy")]</span>										
+						<a class="reload-ajax-action tiny-btn btn" data-dismiss="modal" aria-hidden="true" message="Retweet" url="@routes.Application.retweet(user.getId(), tweet.getId())">R</a>
+					</div>							
+				</td></tr>
+			}
+		}
+	</tbody>
+</table>
+

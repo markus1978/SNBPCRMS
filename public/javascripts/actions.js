@@ -7,7 +7,7 @@ function error(event) {
 }
 
 function loadNextPage() {
-	var nextPage = $(document).find('#nextPage')
+	var nextPage = $(document).find('#next-page')
 	if (typeof nextPage != 'undefined') {
 		if (nextPage.attr('isLoading') == 'false') {
 			nextPage.attr('isLoading', 'true')
@@ -16,7 +16,9 @@ function loadNextPage() {
 				success: function(result) {
 					log('Loaded next page for query')
 					nextPage.attr('isLoading', 'false')
-					nextPage.replaceWith(result)
+					var newPage = nextPage.parent().append(result)
+					nextPage.remove()
+					linkifyAll(newPage.get(), "linkify")
 				},
 			    error: function(xhr, status, error) {
 			    	nextPage.attr('isLoading', 'false')
@@ -38,12 +40,9 @@ $(window).scroll(function() {
 })
 
 $(document).ready(function($) {
-	$('#importAll').click(function() {			
+	$('.simple-ajax-action').click(function() {			
 	    $.ajax({
-	        url: '/twitter/importAll',
-	        data: {
-	        	query: document.getElementById('query').innerHTML
-	        },
+	        url: $(this).attr('url'),
 	        success:function(result, status, xhr) {
 	        	log(result);
 	        },
@@ -52,10 +51,10 @@ $(document).ready(function($) {
 	        }
 	    });
 	})
-	$('#twitterUserHolders').on('change', '.generalDataInput', function() {		
-		var selects = $(this).parents('.general_data').find('select')
+	$('#twitter-user-holders').on('change', '.general-data-input', function() {		
+		var selects = $(this).parents('.general-data').find('select')
 		selects.prop('disabled', true)
-		var data = { id : $(this).parents('.twitterId').attr("twitterId") }
+		var data = { id : $(this).parents('.twitter-id').attr("twitterId") }
 		data[this.name] = this.value
 		$.ajax({
 	        url: '/twitter/update',
@@ -70,21 +69,16 @@ $(document).ready(function($) {
 	        	error(errorThrown);
 	        	selects.prop('disabled', false)
 	        }
-		});
+		})
 	})
-	$('#twitterUserHolders').on('click', '.twitterAction', function() {
-		var twitterDataHolder = $(this).parents('.twitterDataHolder')
-		var id = $(this).parents('.twitterId').attr("twitterId")
-		var data = { id : id }
+	$('#twitter-user-holders').on('click', '.reload-ajax-action', function() {
+		var twitterDataHolder = $(this).parents('.twitter-data-holder')
 		var button = $(this)
 		button.prop('disabled', true)
 		$.ajax({
 	        url: button.attr("url"),
-	        type : 'POST',
-	        contentType : 'text/json',
-	        data: JSON.stringify(data),
 	        success: function(result, status, xhr) {
-	        	log('Follow successfully answered by server.')
+	        	log(button.attr('message') + " successful.")
 	        	button.prop('disabled', false)
 	        	twitterDataHolder.replaceWith(result);
 	        },
@@ -92,22 +86,42 @@ $(document).ready(function($) {
 	        	error(errorThrown);
 	        	button.prop('disabled', false)
 	        }
-		});
+		})
 	})	
+	$('#twitter-user-holders').on('click', '.load-modal-data-ajax-action', function() {
+		var modal = $($(this).attr('href'))
+		$.ajax({
+			url: $(this).attr('url'),
+			success: function(result, status, xhr) {
+				log("Received first timeline page successfully")
+				var modalBody = modal.find('.modal-body')
+				modalBody.html(result)
+				linkifyAll(modalBody.get(), "linkify")
+			},
+			error: function(xhr, status, error) {
+				console.log("Received error " + error) 
+			}
+		})
+	})
 })
 
+var doNotPullLogs = false;
 function pullLog() {
-	$.ajax({
-        url: '/log',
-        success:function(result, status, xhr) {
-        	for (var i = 0; i < result.length; ++i) {
-        		log(result[i].toString())
-        	}
-        },
-        error: function(errorThrown){
-        	error(errorThrown);
-        }
-    });
+	if (!doNotPullLogs) {
+		$.ajax({
+	        url: '/log',
+	        success:function(result, status, xhr) {
+	        	for (var i = 0; i < result.length; ++i) {
+	        		log(result[i].toString())
+	        	}
+	        },
+	        error: function(errorThrown){
+	        	doNotPullLogs = true;
+	        	log("Could not retrieve log from server, stop pulling logs. Reload to reenable logs.")
+	        	error(errorThrown);        	
+	        }
+	    });
+	}
 }
 
 window.setInterval(function(){

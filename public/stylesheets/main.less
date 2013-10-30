@@ -28,47 +28,98 @@
 	color: #AAAAAA;
 }
 
-.twitter_profile {
+header {
+	h1 {
+		font-size: 25px;
+		line-height: 27px;
+		margin: 0px;
+	}
+	padding: 10px 10px 0 10px;
+}
+section#main {
+	padding: 10px;
+}
+
+h1#query {
+	font-size: 16px;
+	line-height: 18px;
+}
+
+#twitter-actions {
+	input {
+		margin-bottom: 0px;
+	}
+}
+
+.twitter-profile {
 	width: 354px;
 }
 
-.twitter_data {
-	width: 150px;
-	.btn {
-		line-height: 6px;
-		width: 12px;
-		padding-left: 3px;
-		padding-right: 10px;
-	}
+.twitter-profile-data {
+	width: 170px;
 }
 
-.general_data {
+.tiny-btn {
+	line-height: 6px;
+	width: 12px;
+	padding-left: 3px;
+	padding-right: 3px;
+}
+
+.general-data {
 	label {
 		float: left;
-		width: 50px;
-		margin-right: 6px;
+		width: 52px;
+		margin: 2px 8px 0 0;
 		text-align: left;
 	}
 	dl {
-		margin-bottom: 2px;
+		margin: 0;
+	}
+	select {
+		width: 140px;
 	}
 }
+.general-data>div:nth-child(1) {
+	float: left;
+	width: 200px;
+}
+.general-data>div:nth-child(2) {
+	margin-left: 206px;
+}
 
-.profile_image {
+.twitter-profile-image, .twitter-tweet-image {
 	width: 48px;
 	float: left;
 }
 
-.profile_texts {
-	width: 300px;
+.twitter-profile-texts, .twitter-tweet-texts {
 	margin-left: 54px;
 	padding-left: 6px;
 }
 
-.profile_stats {
+.twitter-profile-texts {
+	width: 300px;
+}
+
+.twitter-profile-stats {
 	width: 330px;
 }
 
-.twitter_description {
+.twitter-profile-description, .twitter-tweet-text {
 	margin-top: 2px;
 }
+
+.twitter-timeline {
+	.twitter-tweet-data {
+		.twitter-tweet-date {
+			color: @neutral
+		}
+		.twitter-tweet-retweeted {
+			color: @warn
+		}
+	}
+	height: 400px;
+	overflow: scroll;
+}
+

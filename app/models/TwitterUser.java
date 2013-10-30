@@ -117,7 +117,7 @@ public class TwitterUser extends Model {
 
 		@Override
 		public String getProfileURL() {
-			return twitterUser.getURL();
+			return "http://twitter.com/" + twitterUser.getScreenName();
 		}
 
 		@Override

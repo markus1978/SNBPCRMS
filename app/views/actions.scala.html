@@ -1,0 +1,10 @@
+@(actions: java.util.List[models.Action])
+<table class="table table-striped table-bordered table-hover">
+	<tbody>
+		@for(action <- actions) {
+			<tr><td>
+				@action.actionType							
+			</td></tr>			
+		}
+	</tbody>
+</table>
