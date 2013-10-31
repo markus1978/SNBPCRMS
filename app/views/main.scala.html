@@ -32,10 +32,13 @@
 			            	<input class="span2" type="text" placeholder="Email">
 			              	<input class="span2" type="password" placeholder="Password">
 			              	<button type="submit" class="btn">Sign in</button>
-			            </form>-->
+			            </form>-->			            
+			      		<ul id="ratelimits" class="nav pull-right">
+			      			@views.html.ratelimit.render(Application.ratelimits)
+			      		</ul>
 	          		</div><!--/.nav-collapse -->
-	        	</div>
-	      	</div>
+	        	</div>		      	
+	      	</div>	      	
 	      	<div id="log-bar">
 	      		<div id="logs" class="container">
 	      			no logs ...

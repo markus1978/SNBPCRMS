@@ -11,21 +11,28 @@
     } 
     
     <div id="twitter-actions" class="actions">
-        <form action="@routes.Application.users()" method="GET">
-        	<span class="dropdown">
-                <a href="#" class="dropdown-toggle btn" data-toggle="dropdown">Pre&nbsp;<b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                  <li><a href="#" class="pre-query-btn" query="friends: mscheidgen">Friends</a></li>
-                  <li><a href="#" class="pre-query-btn" query="followers: mscheidgen">Follower</a></li>
-                  <li><a href="#" class="pre-query-btn" query="isFriend AND NOT isFollower">Friends not following</a></li>          
-                  <li><a href="#" class="pre-query-btn" query="friendsCount>followersCount">More friends than follower</a></li>
-                  <li><a href="#" class="pre-query-btn" query="friendsCount>followersCount AND NOT (isFriend OR isFollower) ">More friends than follower and not acquainted</a></li>                         
-                </ul>
-            </span>
-        	<input type="text" name="query" class="query" id="twitter-actions-query" value="@query">
-        	<input type="hidden" name="cursor" value="-1">
-            <input type="submit" id="execute" value="Execute" class="btn">
-            <a class="btn simple-ajax-action" url="@routes.Application.importAll(query)">Update/import all</a>
+        <form action="@routes.Application.users()" method="GET">        	
+        	<div class="input-append" style="margin-bottom: 0px">
+	        	<input type="text" name="query" class="query" id="twitter-actions-query" value="@query">
+	        	<span class="dropdown">
+	                <button class="dropdown-toggle btn" data-toggle="dropdown" type="button"><b class="caret"></b></button>
+	                <ul class="dropdown-menu">
+	                  <li class="nav-header">Twitter:</li> 
+	                  <li><a href="#" class="pre-query-btn" query="friends: mscheidgen">Friends</a></li>
+	                  <li><a href="#" class="pre-query-btn" query="followers: mscheidgen">Follower</a></li>
+	                  <li><a href="#" class="pre-query-btn" query="suggested:">Suggested</a></li>
+	                  
+	                  <li class="divider"></li>
+	                  <li class="nav-header">Our database:</li>
+	                  <li><a href="#" class="pre-query-btn" query="isFriend AND NOT isFollower">Friends not following</a></li>          
+	                  <li><a href="#" class="pre-query-btn" query="friendsCount>followersCount">More friends than follower</a></li>
+	                  <li><a href="#" class="pre-query-btn" query="friendsCount>followersCount AND NOT (isFriend OR isFollower) ">More friends than follower and not acquainted</a></li>                                                                            
+	                </ul>
+	            </span>
+	            <input type="submit" id="execute" value="Execute" class="btn">
+	        </div>
+        	<input type="hidden" name="cursor" value="-1">            
+            <button type="button" class="btn simple-ajax-action" url="@routes.Application.importAll(query)">Update/import all</button>                       
         </form>
     </div>
     

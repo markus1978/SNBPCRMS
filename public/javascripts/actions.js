@@ -30,7 +30,6 @@ function loadNextPage() {
 	}
 }
 
-
 $(window).scroll(function() { 
 	setTimeout(function() {	
 		if ($(window).scrollTop() + $(window).height() > $(document).height() * .75) {   
@@ -108,9 +107,9 @@ $(document).ready(function($) {
 	})
 })
 
-var doNotPullLogs = false;
+var doNotPull = false;
 function pullLog() {
-	if (!doNotPullLogs) {
+	if (!doNotPull) {
 		$.ajax({
 	        url: '/log',
 	        success:function(result, status, xhr) {
@@ -119,9 +118,23 @@ function pullLog() {
 	        	}
 	        },
 	        error: function(errorThrown){
-	        	doNotPullLogs = true;
-	        	log("Could not retrieve log from server, stop pulling logs. Reload to reenable logs.")
-	        	error(errorThrown);        	
+	        	doNotPull = true;
+	        	log("Could not retrieve log from server, stop pulling logs and ratelimits. Reload to reenable.")  	
+	        }
+	    });
+	}
+}
+
+function pullRatelimit() {
+	if (!doNotPull) {
+		$.ajax({
+	        url: '/ratelimits',
+	        success:function(result, status, xhr) {
+	        	$(document).find('#ratelimits').html(result)
+	        },
+	        error: function(errorThrown){
+	        	doNotPull = true;
+	        	log("Could not retrieve ratelimit from server, stop pulling logs and ratelimits. Reload to reenable.")      	
 	        }
 	    });
 	}
@@ -129,4 +142,5 @@ function pullLog() {
 
 window.setInterval(function(){
 	pullLog();
+	pullRatelimit();
 }, 1000);

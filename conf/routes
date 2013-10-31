@@ -4,14 +4,14 @@
 
 # Home page
 GET     /                           controllers.Application.index()
-GET	    /twitter/add/:id			controllers.Application.add(id: String)
-GET     /twitter/all                controllers.Application.list(p:Int ?= 0, s ?= "screenName", o ?= "asc")
 GET  	/twitter/users				controllers.Application.users(query ?= "friends: mscheidgen", cursor:Long ?= -1)
 GET		/twitter/ajaxUsers			controllers.Application.ajaxUsers(query: String, cursor: Long)
 GET 	/twitter/ajaxTimeline		controllers.Application.ajaxTimeline(id: Long, maxId: Long)
 GET 	/twitter/ajaxActions		controllers.Application.ajaxActions(id: Long)
 GET 	/twitter/importAll			controllers.Application.importAll(query: String)
+
 GET 	/log						controllers.Application.log()
+GET 	/ratelimits					controllers.Application.ratelimits()
 
 POST 	/twitter/update				controllers.Application.update()
 GET 	/twitter/follow				controllers.Application.follow(id: Long)

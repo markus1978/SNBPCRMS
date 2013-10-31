@@ -145,7 +145,7 @@ public class TwitterUser extends Model {
 		return new UserHolder(t4jUser, update(twitter, existingTwitterUser, t4jUser));
 	}
 	
-	private static TwitterUser update(Twitter twitter, TwitterUser existingTwitterUser, User t4jUser) throws TwitterException {
+	public static TwitterUser update(Twitter twitter, TwitterUser existingTwitterUser, User t4jUser) throws TwitterException {
 		boolean isNew = false;
 		if (existingTwitterUser == null) {
 			isNew = true;

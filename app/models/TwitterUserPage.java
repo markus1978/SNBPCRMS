@@ -11,6 +11,8 @@ import twitter4j.User;
 
 import com.avaje.ebean.Page;
 
+import controllers.Application;
+
 public class TwitterUserPage extends ArrayList<TwitterUser.IUserHolder> {
 	
 	private static final long serialVersionUID = 1L;
@@ -18,6 +20,16 @@ public class TwitterUserPage extends ArrayList<TwitterUser.IUserHolder> {
 	private Long next;
 	private Long prev;
 	private int totalSize;
+	
+	public static TwitterUserPage create(Twitter twitter, List<twitter4j.User> userList) throws TwitterException {		
+		TwitterUserPage result = new TwitterUserPage(null, null, userList.size());
+		
+		for (twitter4j.User twitterUser: userList) {			
+			result.add(TwitterUser.createHolder(twitter, null, twitterUser));
+		}
+		
+		return result;
+	}
 	
 	public static TwitterUserPage create(Twitter twitter, PagableResponseList<twitter4j.User> pagableTwitterUsers, int totalSize) throws TwitterException {		
 		TwitterUserPage result = new TwitterUserPage(
@@ -32,7 +44,7 @@ public class TwitterUserPage extends ArrayList<TwitterUser.IUserHolder> {
 		return result;
 	}
 	
-	public static TwitterUserPage create(Twitter twitter, twitter4j.User user, Page<TwitterUser> myTwitterUsers) throws TwitterException {
+	public static TwitterUserPage create(Twitter twitter, Page<TwitterUser> myTwitterUsers) throws TwitterException {
 		TwitterUserPage result = new TwitterUserPage(
 				myTwitterUsers.hasPrev() ? (long)myTwitterUsers.getPageIndex() -1 : null,
 				myTwitterUsers.hasNext() ? (long)myTwitterUsers.getPageIndex() +1 : null, 
@@ -47,6 +59,8 @@ public class TwitterUserPage extends ArrayList<TwitterUser.IUserHolder> {
 		}
 		
 		ResponseList<User> twitterUsers = twitter.lookupUsers(ids);
+		Application.ratelimits.put("users/lookup", twitterUsers.getRateLimitStatus());
+
 		i = 0;
 		for (TwitterUser myTwitterUser: myTwitterUsersList) {
 			User twitterUser = twitterUsers.get(i++);
