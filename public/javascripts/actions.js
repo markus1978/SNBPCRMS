@@ -40,6 +40,9 @@ $(window).scroll(function() {
 })
 
 $(document).ready(function($) {
+	$('.pre-query-btn').click(function() {
+		$(this).parents('.actions').find('.query').val($(this).attr('query'))
+	})
 	$('.simple-ajax-action').click(function() {			
 	    $.ajax({
 	        url: $(this).attr('url'),

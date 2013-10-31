@@ -206,12 +206,11 @@ public class Application extends Controller {
 	    		.findPagingList(20)
 	    		.setFetchAhead(false)
 	    		.getPage(cursor == -1 ? 0 : (int)cursor);
+			TwitterUserPage userList = TwitterUserPage.create(twitter(), twitter().showUser("mscheidgen"), page);
+			return userList;
     	} catch (Exception e) {
     		return null;
     	}
-    	
-		TwitterUserPage userList = TwitterUserPage.create(twitter(), twitter().showUser("mscheidgen"), page);
-		return userList;
     }
     
     @BodyParser.Of(BodyParser.Json.class)

@@ -10,9 +10,19 @@
         </div>
     } 
     
-    <div id="twitter-actions">
+    <div id="twitter-actions" class="actions">
         <form action="@routes.Application.users()" method="GET">
-        	<input type="text" name="query" id="twitter-actions-query" value="@query">
+        	<span class="dropdown">
+                <a href="#" class="dropdown-toggle btn" data-toggle="dropdown">Pre&nbsp;<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="#" class="pre-query-btn" query="friends: mscheidgen">Friends</a></li>
+                  <li><a href="#" class="pre-query-btn" query="followers: mscheidgen">Follower</a></li>
+                  <li><a href="#" class="pre-query-btn" query="isFriend AND NOT isFollower">Friends not following</a></li>          
+                  <li><a href="#" class="pre-query-btn" query="friendsCount>followersCount">More friends than follower</a></li>
+                  <li><a href="#" class="pre-query-btn" query="friendsCount>followersCount AND NOT (isFriend OR isFollower) ">More friends than follower and not acquainted</a></li>                         
+                </ul>
+            </span>
+        	<input type="text" name="query" class="query" id="twitter-actions-query" value="@query">
         	<input type="hidden" name="cursor" value="-1">
             <input type="submit" id="execute" value="Execute" class="btn">
             <a class="btn simple-ajax-action" url="@routes.Application.importAll(query)">Update/import all</a>
@@ -29,7 +39,7 @@
                 <tr>
                     <th class="header">Twitter's data</th>
                     <th class="header">Our Twitter data</th>
-                    <th class="header">global data</th>
+                    <th class="header">Our client data</th>
                 </tr>
             </thead>
             <tbody id="twitter-user-holders">

@@ -66,7 +66,7 @@
 			</div>
 			<div>	
 			@if(user.getTwitterUser().actions.size()>0){
-				Actions: <a href="#general-data-actions-modal@user.getTwitterUser().id" role="button" class="load-modal-data-ajax-action" url="@routes.Application.ajaxActions(user.getTwitterUser().id)" data-toggle="modal">@user.getTwitterUser().actions.size()</a>:&nbsp;
+				Actions: <a href="#general-data-actions-modal@user.getTwitterUser().id" role="button" class="load-modal-data-ajax-action" url="@routes.Application.ajaxActions(user.getTwitterUser().id)" data-toggle="modal">@user.getTwitterUser().actions.size()</a>:<br/>
 				<!-- Modal -->
 				<div id="general-data-actions-modal@user.getTwitterUser().id" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="general-data-actions-modal-label" aria-hidden="true">
 					<div class="modal-header">
