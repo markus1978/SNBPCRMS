@@ -18,6 +18,8 @@ public class Action extends Model {
 	public enum Service { twitter };
 	public enum Direction { receive, send, global };
 	
+	public static Finder<Long,Action> find = new Finder<Long,Action>(Long.class, Action.class);
+	
 	public static String abr(ActionType type) {
 		if (type == ActionType.beFriend) {
 			return "o";
@@ -50,5 +52,5 @@ public class Action extends Model {
 	public boolean executed;	
 	
 	@ManyToOne
-	public TwitterUser target;
+	public Presence target;
 }

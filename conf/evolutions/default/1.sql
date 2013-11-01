@@ -19,6 +19,17 @@ create table action (
   constraint pk_action primary key (id))
 ;
 
+create table presence (
+  id                        bigint not null,
+  tier                      integer,
+  category                  integer,
+  name                      varchar(255),
+  added                     timestamp,
+  constraint ck_presence_tier check (tier in (0,1,2,3)),
+  constraint ck_presence_category check (category in (0,1,2,3)),
+  constraint pk_presence primary key (id))
+;
+
 create table twitter_user (
   id                        bigint not null,
   screen_name               varchar(255),
@@ -32,22 +43,22 @@ create table twitter_user (
   times_has_been_friend     integer,
   followers_count           integer,
   friends_count             integer,
-  tier                      integer,
-  category                  integer,
-  status                    integer,
   description               varchar(255),
-  constraint ck_twitter_user_tier check (tier in (0,1,2,3)),
-  constraint ck_twitter_user_category check (category in (0,1,2,3)),
-  constraint ck_twitter_user_status check (status in (0,1,2,3)),
+  is_starred                boolean,
+  presence_id               bigint,
   constraint pk_twitter_user primary key (id))
 ;
 
 create sequence action_seq;
 
+create sequence presence_seq;
+
 create sequence twitter_user_seq;
 
-alter table action add constraint fk_action_target_1 foreign key (target_id) references twitter_user (id) on delete restrict on update restrict;
+alter table action add constraint fk_action_target_1 foreign key (target_id) references presence (id) on delete restrict on update restrict;
 create index ix_action_target_1 on action (target_id);
+alter table twitter_user add constraint fk_twitter_user_presence_2 foreign key (presence_id) references presence (id) on delete restrict on update restrict;
+create index ix_twitter_user_presence_2 on twitter_user (presence_id);
 
 
 
@@ -57,11 +68,15 @@ SET REFERENTIAL_INTEGRITY FALSE;
 
 drop table if exists action;
 
+drop table if exists presence;
+
 drop table if exists twitter_user;
 
 SET REFERENTIAL_INTEGRITY TRUE;
 
 drop sequence if exists action_seq;
+
+drop sequence if exists presence_seq;
 
 drop sequence if exists twitter_user_seq;
 

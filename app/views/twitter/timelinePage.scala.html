@@ -19,7 +19,12 @@
 							<span class="twitter-tweet-retweeted">[R]</span>
 						}
 						<span class="twitter-tweet-date">[@tweet.getCreatedAt().format("dd/mm/yy")]</span>										
-						<a class="reload-ajax-action tiny-btn btn" data-dismiss="modal" aria-hidden="true" message="Retweet" url="@routes.TwitterPart.retweet(user.getId(), tweet.getId())">R</a>
+						<a class="reload-ajax-action btn btn-mini" data-dismiss="modal" aria-hidden="true" url="@routes.TwitterPart.retweet(user.getId(), tweet.getId())">
+							<span class="icon-retweet"></span>
+						</a>
+						<a class="btn btn-mini" data-dismiss="modal" aria-hidden="true">
+							<span class="icon-envelope"></span> reply
+						</a>
 					</div>							
 				</td></tr>
 			}

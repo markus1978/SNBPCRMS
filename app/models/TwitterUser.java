@@ -1,14 +1,13 @@
 package models;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
+import models.Presence.Category;
+import models.Presence.Tier;
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
 import twitter4j.Twitter;
@@ -19,10 +18,6 @@ import twitter4j.User;
 public class TwitterUser extends Model {
 
 	private static final long serialVersionUID = 1L;
-	
-	public enum Tier { one, two, three, notAssigned };
-	public enum Category { publication, developer, user, notAssigned };
-	public enum Status { neutral, wishlist, ignored, notAssigned };
 	
 	@Id
 	public Long id;
@@ -57,21 +52,25 @@ public class TwitterUser extends Model {
 	public int friendsCount;
 	
 	@Constraints.Required
-	public Tier tier = Tier.notAssigned;
-	
-	@Constraints.Required
-	public Category category = Category.notAssigned;
-	
-	@Constraints.Required
-	public Status status = Status.notAssigned;
-
-	@Constraints.Required
 	public String description;
+	
+	public boolean isStarred = false;
+	
+	@OneToOne
+	public Presence presence;
 	
 	public static Finder<Long,TwitterUser> find = new Finder<Long,TwitterUser>(Long.class, TwitterUser.class); 
 	
-	@OneToMany(mappedBy="target", cascade=CascadeType.ALL)
-	public List<Action> actions = new ArrayList<Action>();
+	public Presence getPresence() {
+		if (presence == null) {
+			presence = new Presence();
+			presence.category = Category.notAssigned;
+			presence.tier = Tier.notAssigned;
+			presence.name = this.screenName;
+			presence.twitterUser = this;
+		}
+		return presence;
+	}
 	
 	public interface IUserHolder {
 		String getScreenName();
@@ -188,7 +187,6 @@ public class TwitterUser extends Model {
 		existingTwitterUser.description = t4jUser.getDescription();
 		existingTwitterUser.save();
 		
-		TwitterUser.find.byId(existingTwitterUser.id).actions.size();
 		return existingTwitterUser;
 	}
 

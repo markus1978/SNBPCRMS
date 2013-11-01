@@ -8,10 +8,9 @@ import models.Action;
 import models.Action.ActionType;
 import models.Action.Direction;
 import models.Action.Service;
+import models.Presence;
 import models.TwitterUser;
-import models.TwitterUser.Category;
 import models.TwitterUser.IUserHolder;
-import models.TwitterUser.Tier;
 import models.TwitterUserPage;
 import play.db.ebean.Model.Finder;
 import play.libs.Akka;
@@ -269,28 +268,54 @@ public class TwitterPart extends Controller {
     	JsonNode json = request().body().asJson();
     	Long id = json.get("id").asLong();
     	TwitterUser twitterUser = TwitterUser.find.byId(id);
+    	Presence presence = twitterUser.getPresence();    	
     	
     	Iterator<Entry<String, JsonNode>> fields = json.fields();
     	while (fields.hasNext()) {
 			Entry<String, JsonNode> next = fields.next();
 			String key = next.getKey();
 			if (key.equals("category")) {
-				twitterUser.category = Category.valueOf(next.getValue().asText());
-			} else if (key.equals("status")) {
-				twitterUser.status = models.TwitterUser.Status.valueOf(next.getValue().asText());
+				presence.category = models.Presence.Category.valueOf(next.getValue().asText());
+			} else if (key.equals("name")) {
+				presence.name = next.getValue().asText();
 			} else if (key.equals("tier")) {
-				twitterUser.tier = Tier.valueOf(next.getValue().asText());
+				presence.tier = models.Presence.Tier.valueOf(next.getValue().asText());
 			}
 		}
     		
     	twitterUser.save();
+    	presence.save();
+    	
+    	twitterUser = TwitterUser.find.byId(id);
+    	System.out.println(twitterUser.presence.name + " " + presence.id +" " + twitterUser.presence.id);
     	    
-    	return ok("Updated user " + twitterUser.screenName + " with " + twitterUser.category);
+    	return ok("Updated user " + twitterUser.screenName);
     }
     
     public static Result follow(long id) {
     	try {
     		return ok(views.html.twitter.user.render(createAction(id, ActionType.beFriend, null)));
+    	} catch (Exception e) {
+    		return internalServerError(e.getMessage());
+    	}
+    }
+    
+    public static Result unFollow(long id) {
+    	try {
+    		return ok(views.html.twitter.user.render(createAction(id, ActionType.unFriend, null)));
+    	} catch (Exception e) {
+    		return internalServerError(e.getMessage());
+    	}
+    }
+    
+    public static Result retweet(long userId, final long statusId) {
+    	try {
+    		return ok(views.html.twitter.user.render(createAction(userId, ActionType.retweet, new Callback<Action>() {
+				@Override
+				public void invoke(Action arg) {
+					arg.message = Long.toString(statusId);
+				}    			
+    		})));
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
     	}
@@ -315,34 +340,49 @@ public class TwitterPart extends Controller {
     		editAction.invoke(action);
     	}
     	
-    	twitterUser.actions.add(action);
+    	twitterUser.getPresence().actions.add(action);
+    	twitterUser.getPresence().save();
+    	twitterUser.save();
     	User t4jUser = twitter().showUser(id);       
     	Application.ratelimits.put("users/show", t4jUser.getRateLimitStatus());
     	return TwitterUser.createHolder(twitter, twitterUser, t4jUser);
     }
     
-    public static Result unFollow(long id) {
+    public static Result createPresence(long id) {
+    	return update(id, new Callback<TwitterUser>() {
+			@Override
+			public void invoke(TwitterUser twitterUser) {
+				Presence presence = twitterUser.getPresence();	    	
+				presence.save();	
+			}    		
+    	});    	
+    }
+    
+    private static Result update(long id, Callback<TwitterUser> updateTwitterUserCallback) {
     	try {
-    		return ok(views.html.twitter.user.render(createAction(id, ActionType.unFriend, null)));
+	    	TwitterUser twitterUser = TwitterUser.find.byId(id);
+	    	updateTwitterUserCallback.invoke(twitterUser);	    
+			twitterUser.save();
+	    	    	
+	    	User t4jUser = twitter().showUser(id);
+	    	Application.ratelimits.put("users/show", t4jUser.getRateLimitStatus());
+			IUserHolder holder = TwitterUser.createHolder(twitter(), twitterUser, t4jUser);
+			return ok(views.html.twitter.user.render(holder));
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
     	}
     }
     
-    public static Result retweet(long userId, final long statusId) {
-    	try {
-    		return ok(views.html.twitter.user.render(createAction(userId, ActionType.retweet, new Callback<Action>() {
-				@Override
-				public void invoke(Action arg) {
-					arg.message = Long.toString(statusId);
-				}    			
-    		})));
-    	} catch (Exception e) {
-    		return internalServerError(e.getMessage());
-    	}
+	public static Result star(long id, final boolean isStarred) {
+		return update(id, new Callback<TwitterUser>() {
+			@Override
+			public void invoke(TwitterUser twitterUser) {
+				twitterUser.isStarred = isStarred;
+			}
+		});
     }
     
 	public static Result ajaxActions(long id) {
-		return ok(views.html.twitter.actions.render(TwitterUser.find.byId(id).actions));
+		return ok(views.html.twitter.actions.render(TwitterUser.find.byId(id).presence.actions));
 	}
 }

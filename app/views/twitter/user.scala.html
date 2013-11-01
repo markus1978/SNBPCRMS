@@ -1,92 +1,125 @@
 @(user: models.TwitterUser.IUserHolder)
 @import utils.Let._
 @import play.data.Form
-<tr class="twitter-data-holder twitter-id" twitterId="@user.getTwitterUser().id">
-	<td class="twitter-profile">
-		<div class="twitter-profile-conent">
-			<div class="twitter-profile-image">
-				<img src="@user.getImageURL()"></img>
+@if(user.getTwitterUser().isStarred){
+	<tr class="twitter-data-holder twitter-id highlight" twitterId="@user.getTwitterUser().id">
+}else{
+	<tr class="twitter-data-holder twitter-id" twitterId="@user.getTwitterUser().id">
+}
+		<td class="twitter-profile">
+			<div class="twitter-profile-conent">
+				<div class="twitter-profile-image">
+					<img src="@user.getImageURL()"></img>
+				</div>
+				<div class="twitter-profile-texts">
+					<a target="new" href="@user.getProfileURL()">@user.getName()</a>&nbsp;<span style="color: #AAAAAA">@@@user.getScreenName()</span>
+					<p class="twitter-profile-description linkify">@user.getDescription()</p>
+				</div>
 			</div>
-			<div class="twitter-profile-texts">
-				<a target="new" href="@user.getProfileURL()">@user.getName()</a>&nbsp;<span style="color: #AAAAAA">@@@user.getScreenName()</span>
-				<p class="twitter-profile-description linkify">@user.getDescription()</p>
-			</div>
-		</div>
-		<div class="twitter-profile-stats">
-			tweets: <a href="#twitter-timeline-modal@user.getTwitterUser().id" role="button" class="load-modal-data-ajax-action" url="@routes.TwitterPart.ajaxTimeline(user.getTwitterUser().id,-1)" data-toggle="modal">@user.getTweetCount()</a>,&nbsp; 
-			<!-- Modal -->
-			<div id="twitter-timeline-modal@user.getTwitterUser().id" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="twitter-time-line-model-label" aria-hidden="true">
-				<div class="modal-header">
-			    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			    	<h3 id="twitter-time-line-model-label">Timeline of @@@user.getTwitterUser().screenName</h3>
-			  	</div>
-			  	<div class="modal-body twitter-timeline">
-			  	</div>
-			</div>
-			
-			follows: <a href="@routes.TwitterPart.users("friends: " + user.getScreenName(), -1)">@user.getFriendsCount()</a>,&nbsp;
-			followers: <a href="@routes.TwitterPart.users("followers: " + user.getScreenName(), -1)">@user.getFollowersCount()</a><br/>
-			<span class="unimportant">[@user.getTwitterUser().lastUpdated.format("HH:mm dd/mm/yy")]</span>
-			<a class="btn tiny-btn">m</a>
-		</div> 
-	</td>
-	<td class="twitter-profile-data">
-		<div>
-			@if(user.getTwitterUser().isFollower) { 
-				<span class="@{if (user.getTwitterUser().isFriend) "good" else "warn"}">follows</span> 
-				<span>since [@user.getTwitterUser().isFollowerSince.format("dd/mm/yy")]</span>
-			} else { 
-				<span class="@{if (user.getTwitterUser().isFriend) "bad" else "neutral"}">NOT a follower</span>
-				@if(user.getTwitterUser().timesHasBeenFollower > 0) {
-					<span>but was follower for @user.getTwitterUser().timesHasBeenFollower times</span>	
-				}
-			}
-		</div>
-		<div>
-			@if(user.getTwitterUser().isFriend) { 
-				<span style="@{if (user.getTwitterUser().isFollower) "good" else "bad"}">friend</span>
-				<span>since [@user.getTwitterUser().isFriendSince.format("dd/mm/yy")]</span> 
-				<a class="reload-ajax-action tiny-btn btn" message="Follow" url="@routes.TwitterPart.unFollow(user.getTwitterUser().id)">x</a>
-			} else { 
-				<span style="@{if (user.getTwitterUser().isFollower) "warn" else "neutral"}">NOT a friend</span>
-				@if(user.getTwitterUser().timesHasBeenFriend > 0) {
-					<span>but was friend for @user.getTwitterUser().timesHasBeenFriend times</span>	
-				}
-				<a class="reload-ajax-action tiny-btn btn" message="Un-follow" url="@routes.TwitterPart.follow(user.getTwitterUser().id)">o</a>
-			}
-		</div>
-	</td>
-	<td class="general-data">
-		@let(Form.form(classOf[TwitterUser]).fill(user.getTwitterUser())){ form =>
-			<div>
-				<input type="hidden" name="id" value="@user.getTwitterUser().id">
-				@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "general-data-input")
-				@helper.select(form("status"), options = Seq("neutral"->"Neutral", "wishlist" -> "Wishlist", "ignored"->"Ignored", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "general-data-input")
-				@helper.select(form("tier"), options = Seq("tier1"->"Tier 1", "tier2" -> "Tier 2", "tier3"->"Tier 3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "general-data-input")
-			</div>
-			<div>	
-			@if(user.getTwitterUser().actions.size()>0){
-				Actions: <a href="#general-data-actions-modal@user.getTwitterUser().id" role="button" class="load-modal-data-ajax-action" url="@routes.TwitterPart.ajaxActions(user.getTwitterUser().id)" data-toggle="modal">@user.getTwitterUser().actions.size()</a>:<br/>
+			<div class="twitter-profile-stats">
+				tweets: <a href="#twitter-timeline-modal@user.getTwitterUser().id" role="button" class="load-modal-data-ajax-action" url="@routes.TwitterPart.ajaxTimeline(user.getTwitterUser().id,-1)" data-toggle="modal">@user.getTweetCount()</a>,&nbsp; 
 				<!-- Modal -->
-				<div id="general-data-actions-modal@user.getTwitterUser().id" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="general-data-actions-modal-label" aria-hidden="true">
+				<div id="twitter-timeline-modal@user.getTwitterUser().id" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="twitter-time-line-model-label" aria-hidden="true">
 					<div class="modal-header">
 				    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				    	<h3 id="general-data-actions-modal">Actions with @@@user.getTwitterUser().screenName</h3>
+				    	<h3 id="twitter-time-line-model-label">Timeline of @@@user.getTwitterUser().screenName</h3>
 				  	</div>
-				  	<div class="modal-body">
+				  	<div class="modal-body twitter-timeline">
 				  	</div>
 				</div>
-				@for(action <- user.getTwitterUser().actions.reverse.splitAt(5)._1){
-					<span class="btn tiny-btn disabled">@models.Action.abr(action.actionType)</span>
+				
+				follows: <a href="@routes.TwitterPart.users("friends: " + user.getScreenName(), -1)">@user.getFriendsCount()</a>
+				<a class="simple-ajax-action" url='@routes.TwitterPart.importAll("friends: "+user.getScreenName())'><span class="icon-plus-sign"></span>,</a>			
+				followers: <a href="@routes.TwitterPart.users("followers: " + user.getScreenName(), -1)">@user.getFollowersCount()</a>
+				<a class="simple-ajax-action" url='@routes.TwitterPart.importAll("followers: "+user.getScreenName())'><span class="icon-plus-sign"></span></a><br/>
+				<span class="unimportant">[@user.getTwitterUser().lastUpdated.format("HH:mm dd/mm/yy")]</span>
+				<a class="btn btn-mini"><span class="icon-envelope"></span></a>
+			</div> 
+		</td>
+		<td class="twitter-profile-data">
+			<div>
+				@if(user.getTwitterUser().isFollower) { 
+					<span class="@{if (user.getTwitterUser().isFriend) "good" else "warn"}">follows</span> 
+					<span>since [@user.getTwitterUser().isFollowerSince.format("dd/mm/yy")]</span>
+				} else { 
+					<span class="@{if (user.getTwitterUser().isFriend) "bad" else "neutral"}">NOT a follower</span>
+					@if(user.getTwitterUser().timesHasBeenFollower > 0) {
+						<span>but was follower for @user.getTwitterUser().timesHasBeenFollower times</span>	
+					}
 				}
-				@if(user.getTwitterUser().actions.size()>5) {
-					<span>...</span>	
-				}
-			}else{
-				<span>no Actions</span>
-			}
 			</div>
-		}			
-	</td>
-</tr>
+			<div>
+				@if(user.getTwitterUser().isFriend) { 
+					<span style="@{if (user.getTwitterUser().isFollower) "good" else "bad"}">friend</span>
+					<span>since [@user.getTwitterUser().isFriendSince.format("dd/mm/yy")]</span> 
+				} else { 
+					<span style="@{if (user.getTwitterUser().isFollower) "warn" else "neutral"}">NOT a friend</span>
+					@if(user.getTwitterUser().timesHasBeenFriend > 0) {
+						<span>but was friend for @user.getTwitterUser().timesHasBeenFriend times</span>	
+					}			
+				}
+			</div>
+			<div>
+				<a class="btn btn-mini reload-ajax-action" url="@routes.TwitterPart.star(user.getTwitterUser().id,!user.getTwitterUser().isStarred)">
+					@if(user.getTwitterUser().isStarred){
+						<span class="icon-star"></span> unstar
+					}else{
+						<span class="icon-star-empty"></span> star		
+					}
+				</a>
+				@if(user.getTwitterUser().isFriend) { 
+					<a class="reload-ajax-action btn btn-mini" url="@routes.TwitterPart.unFollow(user.getTwitterUser().id)">
+						<span class="icon-thumbs-down"></span> un-follow
+					</a>
+				}else{
+					<a class="reload-ajax-action btn btn-mini" url="@routes.TwitterPart.follow(user.getTwitterUser().id)">
+						<span class="icon-thumbs-up"></span> follow
+					</a>
+				}
+			</div>
+		</td>
+		<td class="general-data">
+			@if(user.getTwitterUser().presence == null){			
+				<a class="btn btn-mini reload-ajax-action" url="@routes.TwitterPart.createPresence(user.getTwitterUser().id)"><span class="icon-file"></span> create</a>
+				<a class="btn btn-mini"><span class="icon-search"></span> assign</a>
+				<p class="help">No presence assigned for this twitter user. Calling any action will create a new one.<p/>
+			}else{
+				@let(user.getTwitterUser().getPresence()){presence=>
+					@let(Form.form(classOf[Presence]).fill(user.getTwitterUser().presence)){ form =>
+						<div>
+							<input type="hidden" name="id" value="@user.getTwitterUser().id">
+							@helper.inputText(form("name"), '_showConstraints -> false, 'class -> "general-data-input") 
+							@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "general-data-input")
+							@helper.select(form("tier"), options = Seq("one"->"1", "two" -> "2", "three"->"3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "general-data-input")
+						</div>
+						<div>	
+						@if(presence.actions.size()>0){
+							Actions: <a href="#general-data-actions-modal@user.getTwitterUser().id" role="button" class="load-modal-data-ajax-action" url="@routes.TwitterPart.ajaxActions(user.getTwitterUser().id)" data-toggle="modal">@presence.actions.size()</a>:<br/>
+							<!-- Modal -->
+							<div id="general-data-actions-modal@user.getTwitterUser().id" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="general-data-actions-modal-label" aria-hidden="true">
+								<div class="modal-header">
+							    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+							    	<h3 id="general-data-actions-modal">Actions with @@@user.getTwitterUser().screenName</h3>
+							  	</div>
+							  	<div class="modal-body">
+							  	</div>
+							</div>
+							@for(action <- presence.actions.reverse.splitAt(5)._1){
+								@if(action.actionType==models.Action.ActionType.beFriend){<span class="label"><span class="icon-thumps-up"></span></span>}
+								@if(action.actionType==models.Action.ActionType.unFriend){<span class="label"><span class="icon-thumbs-down"></span></span>}
+								@if(action.actionType==models.Action.ActionType.message){<span class="label"><span class="icon-envelope"></span></span>}
+								@if(action.actionType==models.Action.ActionType.retweet){<span class="label"><span class="icon-retweet"></span></span>}
+							}
+							@if(presence.actions.size()>5) {
+								<span>...</span>	
+							}
+						}else{
+							<span>no Actions</span>
+						}
+						</div>
+					}
+				}
+			}			
+		</td>
+	</tr>
 
