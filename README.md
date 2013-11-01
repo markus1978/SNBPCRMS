@@ -16,7 +16,7 @@ Features for entities
 - seperate entities from TwitterUser
 [t]oo notes for entities
 [t] tags for entities
-[t]o additional urls to other platforms (could be later uses to connect to facebook, youtube, etc.)
+[t]oo additional urls to other platforms (could be later uses to connect to facebook, youtube, etc.)
 
 Features to implement for twitter:
 [g]oo run actions

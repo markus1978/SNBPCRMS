@@ -2,21 +2,23 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
-GET     /                           controllers.Application.index()
-GET  	/twitter/users				controllers.Application.users(query ?= "friends: mscheidgen", cursor:Long ?= -1)
-GET		/twitter/ajaxUsers			controllers.Application.ajaxUsers(query: String, cursor: Long)
-GET 	/twitter/ajaxTimeline		controllers.Application.ajaxTimeline(id: Long, maxId: Long)
-GET 	/twitter/ajaxActions		controllers.Application.ajaxActions(id: Long)
-GET 	/twitter/importAll			controllers.Application.importAll(query: String)
 
+# GeneralPart
+GET     /                           controllers.Application.index()
 GET 	/log						controllers.Application.log()
 GET 	/ratelimits					controllers.Application.ratelimits()
 
-POST 	/twitter/update				controllers.Application.update()
-GET 	/twitter/follow				controllers.Application.follow(id: Long)
-GET 	/twitter/unfollow			controllers.Application.unFollow(id: Long)
-GET		/twitter/retweet			controllers.Application.retweet(userId: Long, statusId: Long)
+# TwitterPart
+GET  	/twitter/users				controllers.TwitterPart.users(query ?= "friends: mscheidgen", cursor:Long ?= -1)
+GET		/twitter/ajaxUsers			controllers.TwitterPart.ajaxUsers(query: String, cursor: Long)
+GET 	/twitter/ajaxTimeline		controllers.TwitterPart.ajaxTimeline(id: Long, maxId: Long)
+GET 	/twitter/ajaxActions		controllers.TwitterPart.ajaxActions(id: Long)
+
+GET 	/twitter/importAll			controllers.TwitterPart.importAll(query: String)
+POST 	/twitter/update				controllers.TwitterPart.update()
+GET 	/twitter/follow				controllers.TwitterPart.follow(id: Long)
+GET 	/twitter/unfollow			controllers.TwitterPart.unFollow(id: Long)
+GET		/twitter/retweet			controllers.TwitterPart.retweet(userId: Long, statusId: Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

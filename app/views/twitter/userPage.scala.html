@@ -4,7 +4,7 @@
 	@user(userModel)                                               	                                 
 }
 @if(users.hasNext()){
-	<tr id="next-page" url="@routes.Application.ajaxUsers(query, users.getNextCursor())" isLoading="false">
+	<tr id="next-page" url="@routes.TwitterPart.ajaxUsers(query, users.getNextCursor())" isLoading="false">
 		<td colspan="3">
 			loading ...
 		</td>

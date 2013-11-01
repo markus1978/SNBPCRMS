@@ -13,7 +13,7 @@
 			</div>
 		</div>
 		<div class="twitter-profile-stats">
-			tweets: <a href="#twitter-timeline-modal@user.getTwitterUser().id" role="button" class="load-modal-data-ajax-action" url="@routes.Application.ajaxTimeline(user.getTwitterUser().id,-1)" data-toggle="modal">@user.getTweetCount()</a>,&nbsp; 
+			tweets: <a href="#twitter-timeline-modal@user.getTwitterUser().id" role="button" class="load-modal-data-ajax-action" url="@routes.TwitterPart.ajaxTimeline(user.getTwitterUser().id,-1)" data-toggle="modal">@user.getTweetCount()</a>,&nbsp; 
 			<!-- Modal -->
 			<div id="twitter-timeline-modal@user.getTwitterUser().id" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="twitter-time-line-model-label" aria-hidden="true">
 				<div class="modal-header">
@@ -24,8 +24,8 @@
 			  	</div>
 			</div>
 			
-			follows: <a href="@routes.Application.users("friends: " + user.getScreenName(), -1)">@user.getFriendsCount()</a>,&nbsp;
-			followers: <a href="@routes.Application.users("followers: " + user.getScreenName(), -1)">@user.getFollowersCount()</a><br/>
+			follows: <a href="@routes.TwitterPart.users("friends: " + user.getScreenName(), -1)">@user.getFriendsCount()</a>,&nbsp;
+			followers: <a href="@routes.TwitterPart.users("followers: " + user.getScreenName(), -1)">@user.getFollowersCount()</a><br/>
 			<span class="unimportant">[@user.getTwitterUser().lastUpdated.format("HH:mm dd/mm/yy")]</span>
 			<a class="btn tiny-btn">m</a>
 		</div> 
@@ -46,13 +46,13 @@
 			@if(user.getTwitterUser().isFriend) { 
 				<span style="@{if (user.getTwitterUser().isFollower) "good" else "bad"}">friend</span>
 				<span>since [@user.getTwitterUser().isFriendSince.format("dd/mm/yy")]</span> 
-				<a class="reload-ajax-action tiny-btn btn" message="Follow" url="@routes.Application.unFollow(user.getTwitterUser().id)">x</a>
+				<a class="reload-ajax-action tiny-btn btn" message="Follow" url="@routes.TwitterPart.unFollow(user.getTwitterUser().id)">x</a>
 			} else { 
 				<span style="@{if (user.getTwitterUser().isFollower) "warn" else "neutral"}">NOT a friend</span>
 				@if(user.getTwitterUser().timesHasBeenFriend > 0) {
 					<span>but was friend for @user.getTwitterUser().timesHasBeenFriend times</span>	
 				}
-				<a class="reload-ajax-action tiny-btn btn" message="Un-follow" url="@routes.Application.follow(user.getTwitterUser().id)">o</a>
+				<a class="reload-ajax-action tiny-btn btn" message="Un-follow" url="@routes.TwitterPart.follow(user.getTwitterUser().id)">o</a>
 			}
 		</div>
 	</td>
@@ -66,7 +66,7 @@
 			</div>
 			<div>	
 			@if(user.getTwitterUser().actions.size()>0){
-				Actions: <a href="#general-data-actions-modal@user.getTwitterUser().id" role="button" class="load-modal-data-ajax-action" url="@routes.Application.ajaxActions(user.getTwitterUser().id)" data-toggle="modal">@user.getTwitterUser().actions.size()</a>:<br/>
+				Actions: <a href="#general-data-actions-modal@user.getTwitterUser().id" role="button" class="load-modal-data-ajax-action" url="@routes.TwitterPart.ajaxActions(user.getTwitterUser().id)" data-toggle="modal">@user.getTwitterUser().actions.size()</a>:<br/>
 				<!-- Modal -->
 				<div id="general-data-actions-modal@user.getTwitterUser().id" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="general-data-actions-modal-label" aria-hidden="true">
 					<div class="modal-header">

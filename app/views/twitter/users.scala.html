@@ -11,7 +11,7 @@
     } 
     
     <div id="twitter-actions" class="actions">
-        <form action="@routes.Application.users()" method="GET">        	
+        <form action="@routes.TwitterPart.users()" method="GET">        	
         	<div class="input-append" style="margin-bottom: 0px">
 	        	<input type="text" name="query" class="query" id="twitter-actions-query" value="@query">
 	        	<span class="dropdown">
@@ -32,7 +32,7 @@
 	            <input type="submit" id="execute" value="Execute" class="btn">
 	        </div>
         	<input type="hidden" name="cursor" value="-1">            
-            <button type="button" class="btn simple-ajax-action" url="@routes.Application.importAll(query)">Update/import all</button>                       
+            <button type="button" class="btn simple-ajax-action" url="@routes.TwitterPart.importAll(query)">Update/import all</button>                       
         </form>
     </div>
     

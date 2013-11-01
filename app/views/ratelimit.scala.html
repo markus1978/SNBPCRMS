@@ -1,0 +1,19 @@
+@(rateLimitData: java.util.Map[String, twitter4j.RateLimitStatus])
+@import utils.Let._
+@let(new ArrayList[String]){keyList =>
+	@{
+		keyList.addAll(rateLimitData.keySet());
+		"";
+	}
+	@for(key<-keyList.sorted){
+		@let(rateLimitData.get(key)){rateLimitStatus=>
+			@if(rateLimitStatus.getLimit()!=rateLimitStatus.getRemaining()&&((rateLimitStatus.getRemaining()/rateLimitStatus.getLimit().toFloat<.3)||(rateLimitStatus.getRemaining()<=3))) {
+				<li class="twitter-rate-limit">
+					@if(rateLimitStatus.getResetTimeInSeconds().toLong*1000>System.currentTimeMillis()) {
+						<span class="twitter-rate-limit-name">@key</span>:@rateLimitStatus.getRemaining()/@rateLimitStatus.getLimit() for @(new Date(rateLimitStatus.getResetTimeInSeconds().toLong*1000-System.currentTimeMillis()).format("mm:ss"))
+					}
+				</li>
+			}
+		}
+	}
+}
