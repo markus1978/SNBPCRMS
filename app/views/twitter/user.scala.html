@@ -2,9 +2,9 @@
 @import utils.Let._
 @import play.data.Form
 @if(user.getTwitterUser().isStarred){
-	<tr class="twitter-data-holder twitter-id highlight" twitterId="@user.getTwitterUser().id">
+	<tr id="twitter-holder-@user.getTwitterUser().id" class="twitter-id highlight" twitterId="@user.getTwitterUser().id">
 }else{
-	<tr class="twitter-data-holder twitter-id" twitterId="@user.getTwitterUser().id">
+	<tr id="twitter-holder-@user.getTwitterUser().id" class="twitter-id" twitterId="@user.getTwitterUser().id">
 }
 		<td class="twitter-profile">
 			<div class="twitter-profile-conent">
@@ -60,7 +60,7 @@
 				}
 			</div>
 			<div>
-				<a class="btn btn-mini reload-ajax-action" url="@routes.TwitterPart.star(user.getTwitterUser().id,!user.getTwitterUser().isStarred)">
+				<a class="btn btn-mini reload-ajax-action" holder-id="twitter-holder-@user.getTwitterUser().id" url="@routes.TwitterPart.star(user.getTwitterUser().id,!user.getTwitterUser().isStarred)">
 					@if(user.getTwitterUser().isStarred){
 						<span class="icon-star"></span> unstar
 					}else{
@@ -68,58 +68,18 @@
 					}
 				</a>
 				@if(user.getTwitterUser().isFriend) { 
-					<a class="reload-ajax-action btn btn-mini" url="@routes.TwitterPart.unFollow(user.getTwitterUser().id)">
+					<a class="reload-ajax-action btn btn-mini" holder-id="twitter-holder-@user.getTwitterUser().id" url="@routes.TwitterPart.unFollow(user.getTwitterUser().id)">
 						<span class="icon-thumbs-down"></span> un-follow
 					</a>
 				}else{
-					<a class="reload-ajax-action btn btn-mini" url="@routes.TwitterPart.follow(user.getTwitterUser().id)">
+					<a class="reload-ajax-action btn btn-mini" holder-id="twitter-holder-@user.getTwitterUser().id" url="@routes.TwitterPart.follow(user.getTwitterUser().id)">
 						<span class="icon-thumbs-up"></span> follow
 					</a>
 				}
 			</div>
 		</td>
-		<td class="general-data">
-			@if(user.getTwitterUser().presence == null){			
-				<a class="btn btn-mini reload-ajax-action" url="@routes.TwitterPart.createPresence(user.getTwitterUser().id)"><span class="icon-file"></span> create</a>
-				<a class="btn btn-mini"><span class="icon-search"></span> assign</a>
-				<p class="help">No presence assigned for this twitter user. Calling any action will create a new one.<p/>
-			}else{
-				@let(user.getTwitterUser().getPresence()){presence=>
-					@let(Form.form(classOf[Presence]).fill(user.getTwitterUser().presence)){ form =>
-						<div>
-							<input type="hidden" name="id" value="@user.getTwitterUser().id">
-							@helper.inputText(form("name"), '_showConstraints -> false, 'class -> "general-data-input") 
-							@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "general-data-input")
-							@helper.select(form("tier"), options = Seq("one"->"1", "two" -> "2", "three"->"3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "general-data-input")
-						</div>
-						<div>	
-						@if(presence.actions.size()>0){
-							Actions: <a href="#general-data-actions-modal@user.getTwitterUser().id" role="button" class="load-modal-data-ajax-action" url="@routes.TwitterPart.ajaxActions(user.getTwitterUser().id)" data-toggle="modal">@presence.actions.size()</a>:<br/>
-							<!-- Modal -->
-							<div id="general-data-actions-modal@user.getTwitterUser().id" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="general-data-actions-modal-label" aria-hidden="true">
-								<div class="modal-header">
-							    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-							    	<h3 id="general-data-actions-modal">Actions with @@@user.getTwitterUser().screenName</h3>
-							  	</div>
-							  	<div class="modal-body">
-							  	</div>
-							</div>
-							@for(action <- presence.actions.reverse.splitAt(5)._1){
-								@if(action.actionType==models.Action.ActionType.beFriend){<span class="label"><span class="icon-thumps-up"></span></span>}
-								@if(action.actionType==models.Action.ActionType.unFriend){<span class="label"><span class="icon-thumbs-down"></span></span>}
-								@if(action.actionType==models.Action.ActionType.message){<span class="label"><span class="icon-envelope"></span></span>}
-								@if(action.actionType==models.Action.ActionType.retweet){<span class="label"><span class="icon-retweet"></span></span>}
-							}
-							@if(presence.actions.size()>5) {
-								<span>...</span>	
-							}
-						}else{
-							<span>no Actions</span>
-						}
-						</div>
-					}
-				}
-			}			
+		<td class="presence-data">
+			@views.html.presence.embedded.render(user.getTwitterUser().presence, routes.TwitterPart.createPresence(user.getTwitterUser().id).absoluteURL(request()))					
 		</td>
 	</tr>
 

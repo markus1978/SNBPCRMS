@@ -263,35 +263,6 @@ public class TwitterPart extends Controller {
     	}
     }
     
-    @BodyParser.Of(BodyParser.Json.class)
-    public static Result update() {
-    	JsonNode json = request().body().asJson();
-    	Long id = json.get("id").asLong();
-    	TwitterUser twitterUser = TwitterUser.find.byId(id);
-    	Presence presence = twitterUser.getPresence();    	
-    	
-    	Iterator<Entry<String, JsonNode>> fields = json.fields();
-    	while (fields.hasNext()) {
-			Entry<String, JsonNode> next = fields.next();
-			String key = next.getKey();
-			if (key.equals("category")) {
-				presence.category = models.Presence.Category.valueOf(next.getValue().asText());
-			} else if (key.equals("name")) {
-				presence.name = next.getValue().asText();
-			} else if (key.equals("tier")) {
-				presence.tier = models.Presence.Tier.valueOf(next.getValue().asText());
-			}
-		}
-    		
-    	twitterUser.save();
-    	presence.save();
-    	
-    	twitterUser = TwitterUser.find.byId(id);
-    	System.out.println(twitterUser.presence.name + " " + presence.id +" " + twitterUser.presence.id);
-    	    
-    	return ok("Updated user " + twitterUser.screenName);
-    }
-    
     public static Result follow(long id) {
     	try {
     		return ok(views.html.twitter.user.render(createAction(id, ActionType.beFriend, null)));
@@ -349,21 +320,37 @@ public class TwitterPart extends Controller {
     }
     
     public static Result createPresence(long id) {
-    	return update(id, new Callback<TwitterUser>() {
-			@Override
-			public void invoke(TwitterUser twitterUser) {
-				Presence presence = twitterUser.getPresence();	    	
-				presence.save();	
-			}    		
-    	});    	
+    	try {
+	    	TwitterUser twitterUser = update(id, new Callback<TwitterUser>() {
+				@Override
+				public void invoke(TwitterUser twitterUser) {
+					Presence presence = twitterUser.getPresence();	    	
+					presence.save();	
+				}    		
+	    	});
+	    	return ok(views.html.presence.embedded.render(twitterUser.presence, null));
+    	} catch (Exception e) {
+    		return internalServerError(e.getMessage());
+    	}    	
     }
     
-    private static Result update(long id, Callback<TwitterUser> updateTwitterUserCallback) {
-    	try {
-	    	TwitterUser twitterUser = TwitterUser.find.byId(id);
-	    	updateTwitterUserCallback.invoke(twitterUser);	    
-			twitterUser.save();
-	    	    	
+    private static TwitterUser update(long id, Callback<TwitterUser> updateTwitterUserCallback) {
+    	TwitterUser twitterUser = TwitterUser.find.byId(id);
+    	updateTwitterUserCallback.invoke(twitterUser);	    
+		twitterUser.save();
+		return twitterUser;
+    	
+    }
+    
+	public static Result star(long id, final boolean isStarred) {
+		try {
+	    	TwitterUser twitterUser = update(id, new Callback<TwitterUser>() {
+				@Override
+				public void invoke(TwitterUser twitterUser) {
+					twitterUser.isStarred = isStarred;
+				}
+			});
+	    	
 	    	User t4jUser = twitter().showUser(id);
 	    	Application.ratelimits.put("users/show", t4jUser.getRateLimitStatus());
 			IUserHolder holder = TwitterUser.createHolder(twitter(), twitterUser, t4jUser);
@@ -372,17 +359,4 @@ public class TwitterPart extends Controller {
     		return internalServerError(e.getMessage());
     	}
     }
-    
-	public static Result star(long id, final boolean isStarred) {
-		return update(id, new Callback<TwitterUser>() {
-			@Override
-			public void invoke(TwitterUser twitterUser) {
-				twitterUser.isStarred = isStarred;
-			}
-		});
-    }
-    
-	public static Result ajaxActions(long id) {
-		return ok(views.html.twitter.actions.render(TwitterUser.find.byId(id).presence.actions));
-	}
 }

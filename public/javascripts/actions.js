@@ -42,7 +42,7 @@ $(document).ready(function($) {
 	$('.pre-query-btn').click(function() {
 		$(this).parents('.actions').find('.query').val($(this).attr('query'))
 	})
-	$('.simple-ajax-action').click(function() {			
+	$('#container').on('click', '.simple-ajax-action', function() {			
 	    $.ajax({
 	        url: $(this).attr('url'),
 	        success:function(result, status, xhr) {
@@ -53,36 +53,47 @@ $(document).ready(function($) {
 	        }
 	    });
 	})
-	$('#twitter-user-holders').on('change', '.general-data-input', function() {		
-		var selects = $(this).parents('.general-data').find('select')
-		selects.prop('disabled', true)
-		var data = { id : $(this).parents('.twitter-id').attr("twitterId") }
-		data[this.name] = this.value
+	$('#container').on('change', '.ajax-form', function() {		
+		formElements = $(this).parents('.ajax-form-holder').find(':input')
+		formElements.prop('disabled', true)
+		var data = {}
+		form = $(this)
+		data[this.name] = this.value	
 		$.ajax({
-	        url: '/twitter/update',
+	        url: $(this).attr('url'),
 	        type : 'POST',
 	        contentType : 'text/json',
 	        data: JSON.stringify(data),
 	        success: function(result, status, xhr) {
-	        	log(result)
-	        	selects.prop('disabled', false)
+	        	var logMessage = form.attr('ajax-log-message')
+	        	if (logMessage == undefined) {
+	        		log(result)
+	        	} else {
+	        		log(result + ": " + button.attr(logMessage))
+	        	}	        	
+	        	formElements.prop('disabled', false)
 	        },
 	        error: function(errorThrown){
 	        	error(errorThrown);
-	        	selects.prop('disabled', false)
+	        	formElements.prop('disabled', false)
 	        }
 		})
 	})
-	$('#twitter-user-holders').on('click', '.reload-ajax-action', function() {
-		var twitterDataHolder = $(this).parents('.twitter-data-holder')
+	$('#container').on('click', '.reload-ajax-action', function() {
+		var holder = $(this).parents(($(this).attr('holder-id') == undefined) ? '.'+ $(this).attr('holder-class') : '#' + $(this).attr('holder-id'))
 		var button = $(this)
 		button.prop('disabled', true)
 		$.ajax({
 	        url: button.attr("url"),
 	        success: function(result, status, xhr) {
-	        	log(button.attr('message') + " successful.")
+	        	var logMessage = button.attr('ajax-log-message')
+	        	if (logMessage == undefined) {
+	        		log("Update successful")
+	        	} else {
+	        		log(logMessage + " successful")
+	        	}
 	        	button.prop('disabled', false)
-	        	twitterDataHolder.replaceWith(result);
+	        	holder.replaceWith(result);
 	        },
 	        error: function(errorThrown){
 	        	error(errorThrown);
@@ -90,7 +101,7 @@ $(document).ready(function($) {
 	        }
 		})
 	})	
-	$('#twitter-user-holders').on('click', '.load-modal-data-ajax-action', function() {
+	$('#container').on('click', '.load-modal-data-ajax-action', function() {
 		var modal = $($(this).attr('href'))
 		$.ajax({
 			url: $(this).attr('url'),
