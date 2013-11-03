@@ -1,6 +1,8 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -68,7 +70,11 @@ public class TwitterUser extends Model {
 			presence.tier = Tier.notAssigned;
 			presence.name = this.screenName;
 			presence.twitterUser = this;
-		}
+			
+			List<String> url = new ArrayList<String>();
+			url.add("http://twitter.com/" + screenName);
+			presence.setChannelURLs(url);
+		} 
 		return presence;
 	}
 	

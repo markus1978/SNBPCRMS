@@ -4,48 +4,59 @@
 @import helper.{FieldConstructor, inputText, select}
 @import helpers.form.checkbox
 @implicitField = @{FieldConstructor(helpers.form.empty.f) }
+
+@notLastRepeat(field: Field, value: List[_])(content: Html) = {
+	@if(!(field.id.endsWith("_"+(value.size()-1)+"_") || (value.size()==0 && field.id.endsWith("_0_")))) {
+		@content			    				
+	}
+}
+
 <div class="presence-details">	
-	<div>			
-		<div class="ajax-form-holder form-horizontal presence-details-column1">
+	<div class="row-fluid">
+		<div id="presence-details-data-@presence.id" class="ajax-form-holder">			
 			@let(Form.form(classOf[Presence]).fill(presence)){ form =>
-				<input type="hidden" name="id" value="@presence.id">
-				@helper.inputText(form("name"), '_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.id).absoluteURL(request())) 
-				@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.id).absoluteURL(request())) 
-				@helper.select(form("tier"), options = Seq("one"->"1", "two" -> "2", "three"->"3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.id).absoluteURL(request()))
-							
-				<div class="control-group">
- 					<div class="controls without-label">	
-						@for(field <- Array("iOS", "android", "pc", "consoles", "more")){
-							@checkbox(form(field), 'emptyHelper -> true, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.id).absoluteURL(request()))									
-						}
-					</div>
-				</div>								 
-			} 
+				<div class="form-horizontal presence-details-column1">
+					<b>Name and Interests</b>
+					@helper.inputText(form("name"), '_showConstraints -> false) 
+					@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false) 
+					@helper.select(form("tier"), options = Seq("one"->"1", "two" -> "2", "three"->"3", "notAssigned"->"not assigned"),'_showConstraints -> false)
+								
+					<div class="control-group">
+	 					<div class="controls without-label">	
+							@for(field <- Array("iOS", "android", "pc", "consoles", "more")){
+								@checkbox(form(field), 'emptyHelper -> true)									
+							}
+						</div>
+					</div>								 
+				 
+				</div>
+				<div class="presence-details-column2">					
+					@for((label, fieldName, value) <- Array(("channel URLs", "channelURLs", presence.channelURLs),("contact URLs", "contactURLs", presence.contactURLs))) {
+						<div class="control-group">
+							<b>@label</b>				
+							<div id="@fieldName-holder-@presence.id">		
+								@helper.repeat(form(fieldName), min = 1) { urlField =>
+									<div id="@urlField.id-holder-@presence.id" class="url-field">
+					    				@helper.inputText(urlField, '_showConstraints -> false, 'emptyHelper -> true)
+					    				<a class="remove-empty-last-action" last-class="url-field" last-container-id="@fieldName-holder-@presence.id" empty-id="@urlField.id" remove-id="@urlField.id-holder-@presence.id"><span class="control-button icon-minus-sign"></span></a>						    										    			
+						    			<a @notLastRepeat(urlField, value){style="visibility:hidden;"} class="add-url-button add-url-field-action" container-id="@fieldName-holder-@presence.id" copy-id="@urlField.id-holder-@presence.id" to-hide-class="add-url-button"><span class="control-button icon-plus-sign"></span></a>							    					    		
+					    				<a target="new" class="btn btn-mini open-url-action" url-input-id="@urlField.id"><span class="icon-share"></span> open</a>
+					    				<br/>
+				    				</div>
+								}	
+							</div>
+						</div>
+					}							
+				</div>
+			}
 		</div>
 	</div>
 	<div>	
 		@if(presence.actions.size()>0){
-			Actions: <a href="#general-data-actions-modal@presence.id" role="button" class="load-modal-data-ajax-action" url="@routes.PresencePart.ajaxActions(presence.id)" data-toggle="modal">@presence.actions.size()</a>:<br/>
-			<!-- Modal -->
-			<div id="general-data-actions-modal@presence.id" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="general-data-actions-modal-label" aria-hidden="true">
-				<div class="modal-header">
-			    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			    	<h3 id="general-data-actions-modal">Actions with <b>@presence.name</b></h3>
-			  	</div>
-			  	<div class="modal-body">
-			  	</div>
-			</div>
-			@for(action <- presence.actions.reverse.splitAt(5)._1){
-				@if(action.actionType==models.Action.ActionType.beFriend){<span class="label"><span class="icon-thumps-up"></span></span>}
-				@if(action.actionType==models.Action.ActionType.unFriend){<span class="label"><span class="icon-thumbs-down"></span></span>}
-				@if(action.actionType==models.Action.ActionType.message){<span class="label"><span class="icon-envelope"></span></span>}
-				@if(action.actionType==models.Action.ActionType.retweet){<span class="label"><span class="icon-retweet"></span></span>}
-			}
-			@if(presence.actions.size()>5) {
-				<span>...</span>	
-			}
+			<b>Actions</b>
+			@views.html.presence.actions.render(presence.actions)
 		}else{
-			<span>no Actions</span>
+			<b>No actions</b>
 		}
 	</div>	
 </div>

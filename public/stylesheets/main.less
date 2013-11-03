@@ -28,6 +28,11 @@
 	color: #AAAAAA;
 }
 
+.clear-fix:after {
+	display: table;
+	clear: both;
+}
+
 body {
 	padding-top: 64px;
 }
@@ -164,10 +169,26 @@ h1#query {
 			width: 250px;
 		}
 		select {
-			width: 264px;
+			width: 264px;			
 		}
+	}
+	.control-button {
+		margin-bottom: 5px;
+		padding-top: 5px;
 	}
 	.without-label {
 		margin-left: 0;
+	}
+	.presence-details-column1 {
+		float: left;
+		width: 350px;
+	}
+	.presence-details-column2 {
+		margin-left: 350px;
+		padding-left: 10px;
+		input[type='text'] {
+			width: 350px;
+			margin-bottom: 0px;
+		}
 	}
 }

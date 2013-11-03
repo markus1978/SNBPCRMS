@@ -59,7 +59,6 @@ $(document).ready(function($) {
 		var data = {}
 		form = $(this)
 		if ($(this).is(':checkbox')) {
-			console.log('is checkbox ' + $(this).prop('checked'))
 			data[this.name] = $(this).prop('checked')
 		} else {
 			data[this.name] = this.value
@@ -84,27 +83,93 @@ $(document).ready(function($) {
 	        }
 		})
 	})
+	$('#container').on('click', '.remove-empty-last-action', function() {
+		var container = $('#' + $(this).attr('last-container-id'))
+		var elements = container.find('.' + $(this).attr('last-class'))
+		if (elements.length <= 1) {
+			container.find($('#' + $(this).attr('empty-id'))).val('')
+		} else {
+			$('#' + $(this).attr('remove-id')).remove()
+		}
+	})
+	$('#container').on('click', '.add-url-field-action', function() {
+		var html = $($('<div></div>').html($('#' + $(this).attr('copy-id')).clone())).html();		
+		var container = $('#' + $(this).attr('container-id'))
+		
+		html = html.replace(/\[(\d+)\]/g, function(fullMatch, n) {
+			return "[" + (Number(n) + 1) + "]";
+		});
+		html = html.replace(/_(\d+)_/g, function(fullMatch, n) {
+			return "_" + (Number(n) + 1) + "_";
+		});
+		container.append(html).find(":input").last().attr('value','')
+		var elements = container.find('.' + $(this).attr('to-hide-class'))
+		for (var i = 0; i < elements.length-1; i++) {
+			$(elements[i]).attr('style', 'visibility:hidden;')
+		}
+		$(elements[elements.length-1]).attr('style', 'visibility:visible;')
+	})	
 	$('#container').on('click', '.reload-ajax-action', function() {
 		var holder = $(this).parents(($(this).attr('holder-id') == undefined) ? '.'+ $(this).attr('holder-class') : '#' + $(this).attr('holder-id'))
 		var button = $(this)
 		button.prop('disabled', true)
-		$.ajax({
-	        url: button.attr("url"),
-	        success: function(result, status, xhr) {
-	        	var logMessage = button.attr('ajax-log-message')
-	        	if (logMessage == undefined) {
-	        		log("Update successful")
-	        	} else {
-	        		log(logMessage + " successful")
-	        	}
-	        	button.prop('disabled', false)
-	        	holder.replaceWith(result);
-	        },
-	        error: function(errorThrown){
-	        	error(errorThrown);
-	        	button.prop('disabled', false)
-	        }
-		})
+		var dataId = $(this).attr('ajax-data')
+		if (dataId != undefined) {
+			var dataElement = holder.find('#'+dataId);
+			var jsonData = {};
+			$.map(dataElement.find(":input"), function(n, i) {
+				var value = $(n).val();
+				if ($(n).is(':checkbox')) {
+					value = $(n).prop('checked')
+				}
+				if (jsonData[n.name] !== undefined) {
+		            if (!jsonData[n.name].push) {
+		            	jsonData[n.name] = [jsonData[n.name]];
+		            }
+		            jsonData[n.name].push(value || '');
+		        } else {
+		        	jsonData[n.name] = value || '';
+		        }
+			});			
+			$.ajax({
+		        url: button.attr('url'),
+		        type : 'POST',
+		        contentType : 'text/json',
+		        data: JSON.stringify(jsonData),
+		        success: function(result, status, xhr) {
+		        	var logMessage = button.attr('ajax-log-message')
+		        	if (logMessage == undefined) {
+		        		log("Update successful")
+		        	} else {
+		        		log(logMessage + " successful")
+		        	}
+		        	button.prop('disabled', false)
+		        	holder.replaceWith(result);
+		        },
+		        error: function(errorThrown){
+		        	error(errorThrown);
+		        	button.prop('disabled', false)
+		        }
+			})
+		} else {
+			$.ajax({
+		        url: button.attr("url"),
+		        success: function(result, status, xhr) {
+		        	var logMessage = button.attr('ajax-log-message')
+		        	if (logMessage == undefined) {
+		        		log("Update successful")
+		        	} else {
+		        		log(logMessage + " successful")
+		        	}
+		        	button.prop('disabled', false)
+		        	holder.replaceWith(result);
+		        },
+		        error: function(errorThrown){
+		        	error(errorThrown);
+		        	button.prop('disabled', false)
+		        }
+			})
+		}
 	})	
 	$('#container').on('click', '.load-modal-data-ajax-action', function() {
 		var modal = $($(this).attr('href'))
@@ -120,6 +185,13 @@ $(document).ready(function($) {
 				console.log("Received error " + error) 
 			}
 		})
+	})
+	$('#container').on('click', '.open-url-action', function() {
+		var url = $('#' + $(this).attr('url-input-id')).val()
+		if (!url.match('^http://')) {
+			url = 'http://' + url
+		}
+		window.open(url,'new')
 	})
 })
 
@@ -160,3 +232,21 @@ window.setInterval(function(){
 	pullLog();
 	pullRatelimit();
 }, 1000);
+
+function getOuterHTML(el) {   
+    var wrapper = '';
+
+    if(el)
+    {
+        var inner = el.innerHTML;
+        var wrapper = '<' + el.tagName;
+
+        for( var i = 0; i < el.attributes.length; i++ )
+        {
+            wrapper += ' ' + el.attributes[i].nodeName + '="';
+            wrapper += el.attributes[i].nodeValue + '"';
+        }
+        wrapper += '>' + inner + '</' + el.tagName + '>';
+    }
+    return wrapper;
+}

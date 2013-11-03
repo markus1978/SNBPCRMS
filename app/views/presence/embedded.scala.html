@@ -20,11 +20,15 @@
 			<!-- Modal -->
 			<div id="presence-modal@presence.id" class="modal hide fade presence-modal" tabindex="-1" role="dialog" aria-labelledby="presence-modal-label" aria-hidden="true">
 				<div class="modal-header">
-			    	<button type="button" class="close reload-ajax-action" holder-class="presence-holder" url="@routes.PresencePart.ajaxEmbedded(presence.id)" data-dismiss="modal" aria-hidden="true">&times;</button>
+			    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 			    	<h3 id="presence-modal-label">Presence data of <b>@presence.name</b></h3>
 			  	</div>
 			  	<div class="modal-body">
 			  	</div>
+			  	<div class="modal-footer">
+    				<a href="#" class="btn" data-dismiss="modal" aria-hidden="true">Close</a>
+    				<a href="#" class="btn btn-primary reload-ajax-action" data-dismiss="modal" aria-hidden="true" url="@routes.PresencePart.ajaxUpdateDetails(presence.id)" holder-class="presence-holder" ajax-data="presence-details-data-@presence.id">Save changes</a>
+  				</div>
 			</div>
 		</div>
 		<div>	

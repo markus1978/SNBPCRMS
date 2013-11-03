@@ -1,6 +1,7 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 import play.data.validation.Constraints;
 import play.db.ebean.Model;
@@ -45,8 +47,52 @@ public class Presence extends Model {
 	public boolean consoles = false;
 	public boolean more = false;
 	
+	@Constraints.Required
 	public String name;
+	    
+	public String channelURLsBlob = "";
 	
+	public String contactURLsBlob = "";
+	
+	@Transient
+	public List<String> channelURLs;
+	@Transient
+	public List<String> contactURLs;
+	
+	private String serializeURLs(List<String> urls) {
+		StringBuffer result = new StringBuffer();
+		for (String url: urls) {
+			url = url.trim();
+			if (url.length() > 0) {
+				result.append(url);
+				result.append("%&§");
+			}
+		}
+		return result.toString();
+	}
+	
+	private List<String> deserializeURLs(String urlString) {
+		return Arrays.asList(urlString.split("%&§"));
+	}
+	
+	public void setChannelURLs(List<String> urls) {		
+		channelURLsBlob = serializeURLs(urls);
+	}
+	
+	public void setContactURLs(List<String> urls) {		
+		contactURLsBlob = serializeURLs(urls);
+	}
+
+	public List<String>  getChannelURLs() {
+		this.channelURLs = deserializeURLs(channelURLsBlob);
+		return channelURLs;
+	}
+
+	public List<String>  getContactURLs() {
+		this.contactURLs = deserializeURLs(contactURLsBlob);
+		return contactURLs;
+	}
+
 	@Constraints.Required
 	public Date added;
 
