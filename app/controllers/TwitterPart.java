@@ -1,8 +1,6 @@
 package controllers;
 
 import java.util.Date;
-import java.util.Iterator;
-import java.util.Map.Entry;
 
 import models.Action;
 import models.Action.ActionType;
@@ -14,7 +12,6 @@ import models.TwitterUser.IUserHolder;
 import models.TwitterUserPage;
 import play.db.ebean.Model.Finder;
 import play.libs.Akka;
-import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import scala.concurrent.duration.Duration;
@@ -29,7 +26,6 @@ import twitter4j.User;
 import twitter4j.auth.AccessToken;
 
 import com.avaje.ebean.Page;
-import com.fasterxml.jackson.databind.JsonNode;
 
 public class TwitterPart extends Controller {
 

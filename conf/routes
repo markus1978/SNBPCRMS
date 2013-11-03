@@ -21,8 +21,10 @@ GET		/twitter/createPresence     controllers.TwitterPart.createPresence(userId: 
 GET		/twitter/star     			controllers.TwitterPart.star(userId: Long, star: Boolean)
 
 # PresencePart
+GET		/presence/ajaxEmbedded		controllers.PresencePart.ajaxEmbedded(id: Long)
 GET 	/presence/ajaxActions		controllers.PresencePart.ajaxActions(id: Long)
 POST	/presence/ajaxUpdate/:id	controllers.PresencePart.ajaxUpdate(id: Long)
+GET		/presence/ajaxDetails		controllers.PresencePart.ajaxDetails(id: Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

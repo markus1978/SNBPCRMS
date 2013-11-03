@@ -39,6 +39,12 @@ public class Presence extends Model {
 	@Constraints.Required
 	public Category category = Category.notAssigned;
 	
+	public boolean iOS = false;	
+	public boolean android = false;
+	public boolean pc = false;
+	public boolean consoles = false;
+	public boolean more = false;
+	
 	public String name;
 	
 	@Constraints.Required

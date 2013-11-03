@@ -29,6 +29,16 @@ public class PresencePart extends Controller {
 					presence.name = next.getValue().asText();
 				} else if (key.equals("tier")) {
 					presence.tier = models.Presence.Tier.valueOf(next.getValue().asText());
+				} else if (key.equals("iOS")) {
+					presence.iOS = next.getValue().asBoolean();
+				} else if (key.equals("android")) {
+					presence.android = next.getValue().asBoolean();
+				} else if (key.equals("pc")) {
+					presence.pc = next.getValue().asBoolean();
+				} else if (key.equals("consoles")) {
+					presence.consoles = next.getValue().asBoolean();
+				} else if (key.equals("more")) {
+					presence.more = next.getValue().asBoolean();
 				}
 			}
 	    		
@@ -39,4 +49,21 @@ public class PresencePart extends Controller {
     		return internalServerError(e.getMessage());
     	}
 	}
+	
+	public static Result ajaxDetails(long id) {
+		try {
+			return ok(views.html.presence.details.render(Presence.find.byId(id)));	
+		} catch (Exception e) {
+			return internalServerError(e.getMessage());
+		}	
+	}
+	
+	public static Result ajaxEmbedded(long id) {
+		try {
+			return ok(views.html.presence.embedded.render(Presence.find.byId(id), null));	
+		} catch (Exception e) {
+			return internalServerError(e.getMessage());
+		}	
+	}
+	
 }

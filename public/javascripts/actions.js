@@ -58,7 +58,12 @@ $(document).ready(function($) {
 		formElements.prop('disabled', true)
 		var data = {}
 		form = $(this)
-		data[this.name] = this.value	
+		if ($(this).is(':checkbox')) {
+			console.log('is checkbox ' + $(this).prop('checked'))
+			data[this.name] = $(this).prop('checked')
+		} else {
+			data[this.name] = this.value
+		}
 		$.ajax({
 	        url: $(this).attr('url'),
 	        type : 'POST',
