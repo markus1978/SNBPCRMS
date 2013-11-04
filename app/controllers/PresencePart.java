@@ -9,9 +9,36 @@ import models.Presence;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+import com.avaje.ebean.Page;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class PresencePart extends Controller {
+	
+	public static Result list(String query) {    	    	
+    	Page<Presence> page = null;
+    	try {
+	    	page = Presence.find
+	    		.findPagingList(20)
+	    		.setFetchAhead(false)
+	    		.getPage(0);			
+	    	return ok(views.html.presence.list.render(query, page));
+    	} catch (Exception e) {
+    		return internalServerError(e.getMessage());
+    	}		
+	}
+	
+	public static Result ajaxPage(String query, long cursor) {
+		Page<Presence> page = null;
+    	try {
+	    	page = Presence.find
+	    		.findPagingList(20)
+	    		.setFetchAhead(false)
+	    		.getPage((int)cursor);			
+	    	return ok(views.html.presence.page.render(query, page));
+    	} catch (Exception e) {
+    		return internalServerError(e.getMessage());
+    	}
+	}
 	
 	public static Result ajaxActions(long id) {
 		return ok(views.html.presence.actions.render(Presence.find.byId(id).actions, true));

@@ -1,4 +1,4 @@
-@(content: Html)
+@(active: String)(content: Html)
 
 <!DOCTYPE html>
 <html>
@@ -25,10 +25,10 @@
 	          		<a class="brand" href="#">SNBPCRMS</a>
 	          		<div class="nav-collapse collapse">
 			            <ul class="nav">
-			            	<li><a href="#">Presences</a></li>
-				        	<li class="active"><a href="#">Twitter</a></li>
-				            <li><a href="#">Youtube</a></li>
-				            <li><a href="#">Actions</a></li>				            
+			            	<li @if(active=="actions"){class="active"}><a href="#">Actions</a></li>
+			            	<li @if(active=="presences"){class="active"}><a href="@routes.PresencePart.list("")">Presences</a></li>
+				        	<li @if(active=="twitter"){class="active"}><a href="@routes.TwitterPart.users("")">Twitter</a></li>
+				            <li @if(active=="youtube"){class="active"}><a href="#">Youtube</a></li>				            				            
 			            </ul>
 			            <!--<form class="navbar-form pull-right">
 			            	<input class="span2" type="text" placeholder="Email">

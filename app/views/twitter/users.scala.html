@@ -1,6 +1,6 @@
 @(query: String, users: models.TwitterUserPage)
 
-@main {
+@main("twitter") {
     
     <h1 id="query">Query: "<span style="color: #555555" id="query">@query</span>", results in @users.totalSize() twitter users</h1>
 

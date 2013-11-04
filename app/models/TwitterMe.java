@@ -3,11 +3,11 @@ package models;
 import java.util.Collection;
 import java.util.HashSet;
 
-import controllers.Application;
 import twitter4j.IDs;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.User;
+import controllers.Application;
 
 public class TwitterMe {
 

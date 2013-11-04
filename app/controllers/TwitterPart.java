@@ -7,6 +7,7 @@ import models.Action.ActionType;
 import models.Action.Direction;
 import models.Action.Service;
 import models.Presence;
+import models.TwitterMe;
 import models.TwitterUser;
 import models.TwitterUserPage;
 import play.db.ebean.Model.Finder;
@@ -46,9 +47,9 @@ public class TwitterPart extends Controller {
 		return twitter;
 	}
 	
-    public static Result users(String query, long cursor) {
+    public static Result users(String query) {
     	try {
-    		TwitterUserPage result = evaluateQuery(query, cursor, false);
+    		TwitterUserPage result = evaluateQuery(query, -1, false);
     		if (result == null) {
     			return ok(views.html.index.render("Could not evaluate query '" + query + "'"));
     		}
@@ -99,7 +100,9 @@ public class TwitterPart extends Controller {
 
     private static TwitterUserPage evaluateQuery(String query, long cursor, boolean runInBackground) throws TwitterException {
     	TwitterUserPage result = null;
-		if (query.startsWith("friends:")) {
+    	if (query.trim().equals("")) {
+    		result = friends(TwitterMe.instance(twitter()).screenName(), cursor, runInBackground);
+    	} else if (query.startsWith("friends:")) {
 			String screenName = query.substring("friends:".length()).trim();
 			result = friends(screenName, cursor, runInBackground);
 		} else if (query.startsWith("followers:")) {

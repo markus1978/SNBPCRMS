@@ -9,7 +9,7 @@ GET 	/log								controllers.Application.log()
 GET 	/ratelimits							controllers.Application.ratelimits()
 
 # TwitterPart
-GET  	/twitter/users						controllers.TwitterPart.users(query ?= "friends: mscheidgen", cursor:Long ?= -1)
+GET  	/twitter/users						controllers.TwitterPart.users(query ?= "")
 GET		/twitter/ajaxUsers					controllers.TwitterPart.ajaxUsers(query: String, cursor: Long)
 GET 	/twitter/ajaxTimeline				controllers.TwitterPart.ajaxTimeline(id: Long, maxId: Long)
 
@@ -21,6 +21,8 @@ GET		/twitter/createPresence     		controllers.TwitterPart.createPresence(userId
 GET		/twitter/star     					controllers.TwitterPart.star(userId: Long, star: Boolean)
 
 # PresencePart
+GET		/presence/list						controllers.PresencePart.list(query ?= "")
+GET 	/presence/ajaxPage					controllers.PresencePart.ajaxPage(query: String, cursor: Long)
 GET		/presence/ajaxEmbedded				controllers.PresencePart.ajaxEmbedded(id: Long)
 GET 	/presence/ajaxActions				controllers.PresencePart.ajaxActions(id: Long)
 POST	/presence/ajaxUpdate/:id			controllers.PresencePart.ajaxUpdate(id: Long)
