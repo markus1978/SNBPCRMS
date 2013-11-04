@@ -15,7 +15,7 @@ public class Action extends Model {
 	private static final long serialVersionUID = 1L;
 
 	public enum ActionType { beFriend, unFriend, message, retweet };
-	public enum Service { twitter };
+	public enum Service { twitter, facebook, youtube };
 	public enum Direction { receive, send, global };
 	
 	public static Finder<Long,Action> find = new Finder<Long,Action>(Long.class, Action.class);

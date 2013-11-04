@@ -13,7 +13,7 @@ create table action (
   executed_at               timestamp,
   executed                  boolean,
   target_id                 bigint,
-  constraint ck_action_service check (service in (0)),
+  constraint ck_action_service check (service in (0,1,2)),
   constraint ck_action_action_type check (action_type in (0,1,2,3)),
   constraint ck_action_direction check (direction in (0,1,2)),
   constraint pk_action primary key (id))
@@ -40,6 +40,12 @@ create table presence (
 create table twitter_user (
   id                        bigint not null,
   screen_name               varchar(255),
+  description               varchar(255),
+  name                      varchar(255),
+  image_url                 varchar(255),
+  followers_count           integer,
+  friends_count             integer,
+  tweet_count               integer,
   added                     timestamp,
   last_updated              timestamp,
   is_follower               boolean,
@@ -48,9 +54,6 @@ create table twitter_user (
   is_friend                 boolean,
   is_friend_since           timestamp,
   times_has_been_friend     integer,
-  followers_count           integer,
-  friends_count             integer,
-  description               varchar(255),
   is_starred                boolean,
   presence_id               bigint,
   constraint pk_twitter_user primary key (id))

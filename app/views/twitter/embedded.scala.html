@@ -1,0 +1,31 @@
+@(twitterUser: models.TwitterUser, withActions: Boolean)
+
+<div class="twitter-profile-conent">
+	<div class="twitter-profile-image">
+		<img src="@twitterUser.imageURL"></img>
+	</div>
+	<div class="twitter-profile-texts">
+		<a target="new" href="@TwitterUser.getProfileURL(twitterUser)">@twitterUser.name</a>&nbsp;<span style="color: #AAAAAA">@@@twitterUser.screenName</span>
+		<p class="twitter-profile-description linkify">@twitterUser.description</p>
+	</div>
+</div>
+<div class="twitter-profile-stats">
+	tweets: @if(withActions){<a href="#twitter-timeline-modal@twitterUser.id" role="button" class="load-modal-data-ajax-action" url="@routes.TwitterPart.ajaxTimeline(twitterUser.id,-1)" data-toggle="modal">}@twitterUser.tweetCount@if(withActions){</a>},&nbsp; 
+	@if(withActions){
+		<div id="twitter-timeline-modal@twitterUser.id" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="twitter-time-line-model-label" aria-hidden="true">
+			<div class="modal-header">
+		    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		    	<h3 id="twitter-time-line-model-label">Timeline of @@@twitterUser.screenName</h3>
+		  	</div>
+		  	<div class="modal-body twitter-timeline">
+		  	</div>
+		</div>
+	}
+	
+	follows: @if(withActions){<a href="@routes.TwitterPart.users("friends: " + twitterUser.screenName, -1)">}@twitterUser.friendsCount@if(withActions){</a>}
+	<a class="simple-ajax-action" url='@routes.TwitterPart.importAll("friends: "+twitterUser.screenName)'><span class="icon-plus-sign"></span>,</a>			
+	followers: @if(withActions){<a href="@routes.TwitterPart.users("followers: " + twitterUser.screenName, -1)">}@twitterUser.followersCount@if(withActions){</a>}
+	<a class="simple-ajax-action" url='@routes.TwitterPart.importAll("followers: "+twitterUser.screenName)'><span class="icon-plus-sign"></span></a><br/>
+	<span class="unimportant">[@twitterUser.lastUpdated.format("HH:mm dd/mm/yy")]</span>
+	@if(withActions){<a class="btn btn-mini"><span class="icon-envelope"></span></a>}
+</div> 

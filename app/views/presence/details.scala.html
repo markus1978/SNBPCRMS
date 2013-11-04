@@ -13,10 +13,18 @@
 
 <div class="presence-details">	
 	<div class="row-fluid">
+		<div>
+			<h5 class="section">Twitter</h5>
+			@if(presence.twitterUser != null){
+				@views.html.twitter.embeddedSmall.render(presence.twitterUser)
+			}	
+		</div>			
+	</div>
+	<div class="row-fluid">
 		<div id="presence-details-data-@presence.id" class="ajax-form-holder">			
 			@let(Form.form(classOf[Presence]).fill(presence)){ form =>
 				<div class="form-horizontal presence-details-column1">
-					<b>Name and Interests</b>
+					<h5 class="section">Name and Interests</h5>
 					@helper.inputText(form("name"), '_showConstraints -> false) 
 					@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false) 
 					@helper.select(form("tier"), options = Seq("one"->"1", "two" -> "2", "three"->"3", "notAssigned"->"not assigned"),'_showConstraints -> false)
@@ -33,14 +41,14 @@
 				<div class="presence-details-column2">					
 					@for((label, fieldName, value) <- Array(("channel URLs", "channelURLs", presence.channelURLs),("contact URLs", "contactURLs", presence.contactURLs))) {
 						<div class="control-group">
-							<b>@label</b>				
+							<h5 class="section">@label</h5>				
 							<div id="@fieldName-holder-@presence.id">		
 								@helper.repeat(form(fieldName), min = 1) { urlField =>
 									<div id="@urlField.id-holder-@presence.id" class="url-field">
 					    				@helper.inputText(urlField, '_showConstraints -> false, 'emptyHelper -> true)
-					    				<a class="remove-empty-last-action" last-class="url-field" last-container-id="@fieldName-holder-@presence.id" empty-id="@urlField.id" remove-id="@urlField.id-holder-@presence.id"><span class="control-button icon-minus-sign"></span></a>						    										    			
-						    			<a @notLastRepeat(urlField, value){style="visibility:hidden;"} class="add-url-button add-url-field-action" container-id="@fieldName-holder-@presence.id" copy-id="@urlField.id-holder-@presence.id" to-hide-class="add-url-button"><span class="control-button icon-plus-sign"></span></a>							    					    		
-					    				<a target="new" class="btn btn-mini open-url-action" url-input-id="@urlField.id"><span class="icon-share"></span> open</a>
+					    				<a class="remove-empty-last-action" last-class="url-field" last-container-id="@fieldName-holder-@presence.id" empty-id="@urlField.id" remove-id="@urlField.id-holder-@presence.id"><p class="control-button icon-minus-sign"></p></a>						    										    			
+						    			<a @notLastRepeat(urlField, value){style="visibility:hidden;"} class="add-url-button add-url-field-action" container-id="@fieldName-holder-@presence.id" copy-id="@urlField.id-holder-@presence.id" to-hide-class="add-url-button"><p class="control-button icon-plus-sign"></p></a>							    					    		
+					    				<a target="new" class="btn btn-mini open-url-action" url-input-id="@urlField.id"><p class="icon-share"></p> open</a>
 					    				<br/>
 				    				</div>
 								}	
@@ -53,10 +61,10 @@
 	</div>
 	<div>	
 		@if(presence.actions.size()>0){
-			<b>Actions</b>
-			@views.html.presence.actions.render(presence.actions)
+			<h5 class="section">Actions</h5>
+			@views.html.presence.actions.render(presence.actions, false)
 		}else{
-			<b>No actions</b>
+			<h5 class="section">No actions</h5>
 		}
 	</div>	
 </div>

@@ -27,35 +27,26 @@ public class TwitterUser extends Model {
 	@Constraints.Required
 	public String screenName;
 	
+	public String description;
+	public String name;
+	public String imageURL;
+	public int followersCount;
+	public int friendsCount;
+	public int tweetCount;
+	
 	@Constraints.Required
 	public Date added;
 	
 	@Constraints.Required
 	public Date lastUpdated;
 	
-	@Constraints.Required
-	public boolean isFollower;
-	
-	public Date isFollowerSince;
-	
+	public boolean isFollower;	
+	public Date isFollowerSince;	
 	public int timesHasBeenFollower = 0;
-	
-	@Constraints.Required
 	public boolean isFriend;
-	
 	public Date isFriendSince;
-	
 	public int timesHasBeenFriend = 0;
-
-	@Constraints.Required
-	public int followersCount;
-	
-	@Constraints.Required
-	public int friendsCount;
-	
-	@Constraints.Required
-	public String description;
-	
+			
 	public boolean isStarred = false;
 	
 	@OneToOne
@@ -78,76 +69,8 @@ public class TwitterUser extends Model {
 		return presence;
 	}
 	
-	public interface IUserHolder {
-		String getScreenName();
-		String getName();
-		String getDescription();
-		String getImageURL();
-		String getProfileURL();
-		int getFollowersCount();
-		int getFriendsCount();
-		int getTweetCount();
-		TwitterUser getTwitterUser();
-	}
-	
-	public static class UserHolder implements IUserHolder {
-		private final twitter4j.User twitterUser;
-		private final TwitterUser myTwitterUser;
-		
-		private UserHolder(User twitterUser, TwitterUser myTwitterUser) {
-			super();
-			this.twitterUser = twitterUser;
-			this.myTwitterUser = myTwitterUser;
-		}
-
-		@Override
-		public String getScreenName() {
-			return twitterUser.getScreenName();
-		}
-
-		@Override
-		public String getName() {
-			return twitterUser.getName();
-		}
-
-		@Override
-		public String getDescription() {
-			return twitterUser.getDescription();
-		}
-
-		@Override
-		public String getImageURL() {
-			return twitterUser.getProfileImageURL();
-		}
-
-		@Override
-		public String getProfileURL() {
-			return "http://twitter.com/" + twitterUser.getScreenName();
-		}
-
-		@Override
-		public int getFollowersCount() {
-			return twitterUser.getFollowersCount();
-		}
-
-		@Override
-		public int getFriendsCount() {
-			return twitterUser.getFriendsCount();
-		}
-
-		@Override
-		public int getTweetCount() {
-			return twitterUser.getStatusesCount();
-		}
-
-		@Override
-		public TwitterUser getTwitterUser() {
-			return myTwitterUser;
-		}
-	}
-	
-	public static IUserHolder createHolder(Twitter twitter, TwitterUser existingTwitterUser, User t4jUser) throws TwitterException {
-		return new UserHolder(t4jUser, update(twitter, existingTwitterUser, t4jUser));
+	public static String getProfileURL(TwitterUser twitterUser) {
+		return "http://twitter.com/" + twitterUser.screenName;
 	}
 	
 	public static TwitterUser update(Twitter twitter, TwitterUser existingTwitterUser, User t4jUser) throws TwitterException {
@@ -159,6 +82,9 @@ public class TwitterUser extends Model {
 				existingTwitterUser = new TwitterUser();
 				existingTwitterUser.id = t4jUser.getId();
 				existingTwitterUser.screenName = t4jUser.getScreenName();
+				existingTwitterUser.name = t4jUser.getName();
+				existingTwitterUser.imageURL = t4jUser.getProfileImageURL();
+				existingTwitterUser.tweetCount = t4jUser.getStatusesCount();
 				existingTwitterUser.added = new Date();
 			}
 		}
@@ -195,5 +121,4 @@ public class TwitterUser extends Model {
 		
 		return existingTwitterUser;
 	}
-
 }

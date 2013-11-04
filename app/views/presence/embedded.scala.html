@@ -44,10 +44,7 @@
 			  	</div>
 			</div>
 			@for(action <- presence.actions.reverse.splitAt(5)._1){
-				@if(action.actionType==models.Action.ActionType.beFriend){<span class="label"><span class="icon-thumps-up"></span></span>}
-				@if(action.actionType==models.Action.ActionType.unFriend){<span class="label"><span class="icon-thumbs-down"></span></span>}
-				@if(action.actionType==models.Action.ActionType.message){<span class="label"><span class="icon-envelope"></span></span>}
-				@if(action.actionType==models.Action.ActionType.retweet){<span class="label"><span class="icon-retweet"></span></span>}
+				@views.html.presence.actionType.render(action)<br/>				
 			}
 			@if(presence.actions.size()>5) {
 				<span>...</span>	

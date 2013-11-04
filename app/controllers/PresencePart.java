@@ -12,8 +12,9 @@ import play.mvc.Result;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class PresencePart extends Controller {
+	
 	public static Result ajaxActions(long id) {
-		return ok(views.html.presence.actions.render(Presence.find.byId(id).actions));
+		return ok(views.html.presence.actions.render(Presence.find.byId(id).actions, true));
 	}
 	
 	public static Result ajaxUpdate(long id) {
@@ -36,7 +37,6 @@ public class PresencePart extends Controller {
     	while (fields.hasNext()) {
 			Entry<String, JsonNode> next = fields.next();
 			String key = next.getKey();
-			System.out.println(next.getKey() + ":" + next.getValue().asText());
 			if (key.equals("category")) {
 				presence.category = models.Presence.Category.valueOf(next.getValue().asText());
 			} else if (key.equals("name")) {
@@ -90,8 +90,8 @@ public class PresencePart extends Controller {
 	public static Result ajaxDetails(long id) {
 		try {
 			Presence presence = Presence.find.byId(id);
-			System.out.println(presence.getContactURLs().size());
-			System.out.println(presence.getChannelURLs().size());
+			presence.getContactURLs().size();
+			presence.getChannelURLs().size();
 			return ok(views.html.presence.details.render(presence));	
 		} catch (Exception e) {
 			return internalServerError(e.getMessage());

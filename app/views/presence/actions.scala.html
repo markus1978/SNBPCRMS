@@ -1,10 +1,32 @@
-@(actions: java.util.List[models.Action])
+@(actions: java.util.List[models.Action], withTarget: Boolean)
 <table class="table table-striped table-bordered table-hover">
 	<tbody>
 		@for(action <- actions) {
-			<tr><td>
-				@action.actionType							
-			</td></tr>			
+			<tr>
+				<td class="action-type">
+					@views.html.presence.actionType(action)												
+				</td>
+				@if(withTarget) {
+					<td class="action-target">
+						<!-- target  --> 
+						@if(action.service==models.Action.Service.twitter){
+							@views.html.twitter.embeddedSmall(action.target.twitterUser)
+						}
+					</td>
+				}
+				<td class="action-body">
+					<!-- body  --> 
+					@if(action.message == null || action.message.trim().equals("")) {
+						<span class="unimportant">This action has not message.</span>	
+					}else{
+						<p class="linkify">@action.message</p>
+					}
+				</td>
+				<td class="action-follow-ups">
+					<!-- follow up actions -->
+					<span class="unimportant">No available follow up actions.</span>
+				</td>
+			</tr>			
 		}
 	</tbody>
 </table>

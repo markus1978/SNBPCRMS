@@ -8,7 +8,6 @@ import models.Action.Direction;
 import models.Action.Service;
 import models.Presence;
 import models.TwitterUser;
-import models.TwitterUser.IUserHolder;
 import models.TwitterUserPage;
 import play.db.ebean.Model.Finder;
 import play.libs.Akka;
@@ -292,7 +291,7 @@ public class TwitterPart extends Controller {
     	void invoke(T arg);
     }
     
-    private static IUserHolder createAction(long id, ActionType actionType, Callback<Action> editAction) throws TwitterException {    	
+    private static TwitterUser createAction(long id, ActionType actionType, Callback<Action> editAction) throws TwitterException {    	
     	final TwitterUser twitterUser = TwitterUser.find.byId(id);
     	
     	final Action action = new Action();
@@ -312,7 +311,7 @@ public class TwitterPart extends Controller {
     	twitterUser.save();
     	User t4jUser = twitter().showUser(id);       
     	Application.ratelimits.put("users/show", t4jUser.getRateLimitStatus());
-    	return TwitterUser.createHolder(twitter, twitterUser, t4jUser);
+    	return TwitterUser.update(twitter, twitterUser, t4jUser);
     }
     
     public static Result createPresence(long id) {
@@ -349,8 +348,8 @@ public class TwitterPart extends Controller {
 	    	
 	    	User t4jUser = twitter().showUser(id);
 	    	Application.ratelimits.put("users/show", t4jUser.getRateLimitStatus());
-			IUserHolder holder = TwitterUser.createHolder(twitter(), twitterUser, t4jUser);
-			return ok(views.html.twitter.user.render(holder));
+			twitterUser = TwitterUser.update(twitter(), twitterUser, t4jUser);
+			return ok(views.html.twitter.user.render(twitterUser));
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
     	}

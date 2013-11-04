@@ -1,0 +1,31 @@
+@(twitterUser: models.TwitterUser)
+
+<div class="twitter-profile-conent">
+	<div class="twitter-profile-image">
+		<img src="@twitterUser.imageURL"></img>
+	</div>
+	<div class="twitter-profile-texts">
+		<a target="new" href="@TwitterUser.getProfileURL(twitterUser)">@twitterUser.name</a>&nbsp;<span style="color: #AAAAAA">@@@twitterUser.screenName</span>
+		<div class="twitter-profile-stats">			 						
+			follows: <a href="@routes.TwitterPart.users("friends: " + twitterUser.screenName, -1)">@twitterUser.friendsCount</a>
+			<a class="simple-ajax-action" url='@routes.TwitterPart.importAll("friends: "+twitterUser.screenName)'><span class="icon-plus-sign"></span>,</a>			
+			followers: <a href="@routes.TwitterPart.users("followers: " + twitterUser.screenName, -1)">@twitterUser.followersCount</a>
+			<a class="simple-ajax-action" url='@routes.TwitterPart.importAll("followers: "+twitterUser.screenName)'><span class="icon-plus-sign"></span></a><br/>
+					
+			@if(twitterUser.isFollower) {
+				@if(twitterUser.isFriend) {
+					<span class="label label-good"><span class="icon-ok-sign"></span> follower and friend</span>
+				} else {
+					<span class="label label-warn"><span class="icon-exclamation-sign"></span> follower but not friend</span>
+				}								
+			} else {
+				@if(twitterUser.isFriend) {
+					<span class="label label-bad"><span class="icon-exclamation-sign"></span> friend that does not follow</span>
+				} else {
+					<span class="label"><span class="icon-question-sign"></span> not aquainted</span>
+				}				 				
+			}						
+		</div>
+	</div>
+</div>
+ 

@@ -13,7 +13,7 @@ import com.avaje.ebean.Page;
 
 import controllers.Application;
 
-public class TwitterUserPage extends ArrayList<TwitterUser.IUserHolder> {
+public class TwitterUserPage extends ArrayList<TwitterUser> {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -25,7 +25,7 @@ public class TwitterUserPage extends ArrayList<TwitterUser.IUserHolder> {
 		TwitterUserPage result = new TwitterUserPage(null, null, userList.size());
 		
 		for (twitter4j.User twitterUser: userList) {			
-			result.add(TwitterUser.createHolder(twitter, null, twitterUser));
+			result.add(TwitterUser.update(twitter, null, twitterUser));
 		}
 		
 		return result;
@@ -38,7 +38,7 @@ public class TwitterUserPage extends ArrayList<TwitterUser.IUserHolder> {
 				totalSize);
 		
 		for (twitter4j.User twitterUser: pagableTwitterUsers) {			
-			result.add(TwitterUser.createHolder(twitter, null, twitterUser));
+			result.add(TwitterUser.update(twitter, null, twitterUser));
 		}
 		
 		return result;
@@ -64,7 +64,7 @@ public class TwitterUserPage extends ArrayList<TwitterUser.IUserHolder> {
 		i = 0;
 		for (TwitterUser myTwitterUser: myTwitterUsersList) {
 			User twitterUser = twitterUsers.get(i++);
-			result.add(TwitterUser.createHolder(twitter, myTwitterUser, twitterUser));
+			result.add(TwitterUser.update(twitter, myTwitterUser, twitterUser));
 		}
 		return result;
 	}
