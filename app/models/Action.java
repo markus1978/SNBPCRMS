@@ -14,7 +14,7 @@ public class Action extends Model {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum ActionType { beFriend, unFriend, message, retweet };
+	public enum ActionType { beFriend, unFriend, message, retweet, publicMessage };
 	public enum Service { twitter, facebook, youtube };
 	public enum Direction { receive, send, global };
 	

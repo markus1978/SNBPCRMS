@@ -1,6 +1,10 @@
 package controllers;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
 
 import models.Action;
 import models.Action.ActionType;
@@ -26,6 +30,7 @@ import twitter4j.User;
 import twitter4j.auth.AccessToken;
 
 import com.avaje.ebean.Page;
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class TwitterPart extends Controller {
 
@@ -290,13 +295,23 @@ public class TwitterPart extends Controller {
     	}
     }
     
+    public static Result ajaxCreateDirectMessage(long targetId) {
+    	try {
+    		TwitterUser twitterUser = TwitterUser.find.byId(targetId);
+    		Action action = createAction(twitterUser, ActionType.message);
+    		action.target = twitterUser.getPresence();
+    		twitterUser.save();    		
+			return ok(views.html.action.details.render(action));
+    	} catch (Exception e) {
+    		return internalServerError(e.getMessage());
+    	}
+    }
+    
     public interface Callback<T> {
     	void invoke(T arg);
     }
     
-    private static TwitterUser createAction(long id, ActionType actionType, Callback<Action> editAction) throws TwitterException {    	
-    	final TwitterUser twitterUser = TwitterUser.find.byId(id);
-    	
+    private static Action createAction(TwitterUser twitterUser, ActionType actionType) {    
     	final Action action = new Action();
     	action.service = Service.twitter;
     	action.direction = Direction.send;
@@ -304,7 +319,14 @@ public class TwitterPart extends Controller {
     	
     	action.scheduledFor = new Date();
     	action.executed = false;
-		
+		    	
+    	return action;
+    }
+    
+    private static TwitterUser createAction(long id, ActionType actionType, Callback<Action> editAction) throws TwitterException {    	
+    	final TwitterUser twitterUser = TwitterUser.find.byId(id);
+    	
+    	final Action action = createAction(twitterUser, actionType);
     	if (editAction != null) {
     		editAction.invoke(action);
     	}
@@ -357,4 +379,25 @@ public class TwitterPart extends Controller {
     		return internalServerError(e.getMessage());
     	}
     }
+	
+	public static Result ajaxSendDirectMessage(long targetId) {
+    	TwitterUser twitterUser = TwitterUser.find.byId(targetId);
+    	Action action = createAction(twitterUser, ActionType.message);
+    	
+    	JsonNode json = request().body().asJson();    
+    	Iterator<Entry<String, JsonNode>> fields = json.fields();    	
+    	while (fields.hasNext()) {
+			Entry<String, JsonNode> next = fields.next();
+			String key = next.getKey();
+			if (key.equals("message")) {
+				action.message = next.getValue().asText();
+			} 
+		}
+
+    	twitterUser.getPresence().actions.add(action);
+    	twitterUser.getPresence().save();
+    	action.save();
+    	    	
+		return ok(views.html.twitter.row.render(twitterUser));
+	}
 }

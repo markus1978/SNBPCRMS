@@ -1,0 +1,32 @@
+@(action: models.Action)
+@import utils.Let._
+@import play.data.Form
+@import helper.{FieldConstructor, inputText, select}
+@import helpers.form.checkbox
+@implicitField = @{FieldConstructor(helpers.form.empty.f) }
+
+@notLastRepeat(field: Field, value: List[_])(content: Html) = {
+	@if(!(field.id.endsWith("_"+(value.size()-1)+"_") || (value.size()==0 && field.id.endsWith("_0_")))) {
+		@content			    				
+	}
+}
+
+<div class="action-details">	
+	@if(action.target != null && action.service == models.Action.Service.twitter){
+		@views.html.twitter.embeddedSmall(action.target.twitterUser)
+	}											
+	<div id="action-details-data-@action.id" class="ajax-form-holder">
+		@let(Form.form(classOf[models.Action]).fill(action)){ form =>
+			<div class="form-horizontal action-config-column">
+				<h5 class="section">Configuration</h5>  
+				@helper.select(form("actionType"), options = Seq("beFriend"->"follow", "unFriend" -> "un follow", "message"->"direct message", "retween"->"share", "publicMessage" -> "public message"),'_showConstraints -> false)
+				@helper.select(form("service"), options = Seq("twitter"->"Twitter", "facebook" -> "facebook", "youtube"->"YOUtube"),'_showConstraints -> false)
+				@helper.select(form("direction"), options = Seq("send"->"send", "global"->"global"),'_showConstraints -> false)																						 
+			</div>
+			<div class="action-body-column">
+				<h5 class="section">Body</h5>
+				@helper.textarea(form("message"), 'emptyHelper->true)
+			</div>
+		}
+	</div>
+</div>

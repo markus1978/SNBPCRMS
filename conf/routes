@@ -13,12 +13,17 @@ GET  	/twitter/users						controllers.TwitterPart.users(query ?= "")
 GET		/twitter/ajaxUsers					controllers.TwitterPart.ajaxUsers(query: String, cursor: Long)
 GET 	/twitter/ajaxTimeline				controllers.TwitterPart.ajaxTimeline(id: Long, maxId: Long)
 
+GET		/twitter/createPresence     		controllers.TwitterPart.createPresence(userId: Long)
+GET		/twitter/star     					controllers.TwitterPart.star(userId: Long, star: Boolean)
+
 GET 	/twitter/importAll					controllers.TwitterPart.importAll(query: String)
+
 GET 	/twitter/follow						controllers.TwitterPart.follow(id: Long)
 GET 	/twitter/unfollow					controllers.TwitterPart.unFollow(id: Long)
 GET		/twitter/retweet					controllers.TwitterPart.retweet(userId: Long, statusId: Long)
-GET		/twitter/createPresence     		controllers.TwitterPart.createPresence(userId: Long)
-GET		/twitter/star     					controllers.TwitterPart.star(userId: Long, star: Boolean)
+GET		/twitter/ajaxCreateDirectMessage	controllers.TwitterPart.ajaxCreateDirectMessage(targetId: Long)
+POST	/twitter/ajaxSendDirectMessage		controllers.TwitterPart.ajaxSendDirectMessage(targetId: Long)
+
 
 # PresencePart
 GET		/presence/list						controllers.PresencePart.list(query ?= "")

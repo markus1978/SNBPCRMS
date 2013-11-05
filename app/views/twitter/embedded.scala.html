@@ -1,5 +1,5 @@
 @(twitterUser: models.TwitterUser, withActions: Boolean)
-
+@import views.html.helpers._
 <div class="twitter-profile-conent">
 	<div class="twitter-profile-image">
 		<img src="@twitterUser.imageURL"></img>
@@ -27,5 +27,12 @@
 	followers: @if(withActions){<a href="@routes.TwitterPart.users("followers: " + twitterUser.screenName)">}@twitterUser.followersCount@if(withActions){</a>}
 	<a class="simple-ajax-action" url='@routes.TwitterPart.importAll("followers: "+twitterUser.screenName)'><span class="icon-plus-sign"></span></a><br/>
 	<span class="unimportant">[@twitterUser.lastUpdated.format("HH:mm dd/mm/yy")]</span>
-	@if(withActions){<a class="btn btn-mini"><span class="icon-envelope"></span></a>}
+
+	@if(withActions){
+		<div id="send-direct-message-data-@twitterUser.id">
+			@modalButton(twitterUser.id, routes.TwitterPart.ajaxCreateDirectMessage(twitterUser.id).absoluteURL(request()), "Send direct message to " + twitterUser.screenName, routes.TwitterPart.ajaxSendDirectMessage(twitterUser.id).absoluteURL(request()), "twitter-holder-"+twitterUser.id, "send-direct-message-data-"+twitterUser.id){
+				<span class="icon-envelope"></span> direct message	
+			}		
+		</div>
+	}
 </div> 

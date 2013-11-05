@@ -14,7 +14,7 @@ create table action (
   executed                  boolean,
   target_id                 bigint,
   constraint ck_action_service check (service in (0,1,2)),
-  constraint ck_action_action_type check (action_type in (0,1,2,3)),
+  constraint ck_action_action_type check (action_type in (0,1,2,3,4)),
   constraint ck_action_direction check (direction in (0,1,2)),
   constraint pk_action primary key (id))
 ;
