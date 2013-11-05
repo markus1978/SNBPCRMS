@@ -279,12 +279,33 @@ public class TwitterPart extends Controller {
     	}
     }
     
-    public static Result retweet(long userId, final long statusId) {
+    public static Result retweet(long userId, final long statusId) {    	
     	try {
+    		twitter4j.Status status = twitter().showStatus(statusId);
+			final String body = status.getText();
+    		Application.ratelimits.put("statuses/show", status.getRateLimitStatus());
     		return ok(views.html.twitter.row.render(createAndSaveAction(userId, ActionType.retweet, new Callback<Action>() {
 				@Override
 				public void invoke(Action arg) {
-					arg.message = Long.toString(statusId);
+					arg.replyToId = statusId;
+					arg.message = body;
+				}    			
+    		})));
+    	} catch (Exception e) {
+    		return internalServerError(e.getMessage());
+    	}
+    }
+    
+    public static Result favor(long userId, final long statusId) {
+    	try {
+    		twitter4j.Status status = twitter().showStatus(statusId);
+			final String body = status.getText();
+    		Application.ratelimits.put("statuses/show", status.getRateLimitStatus());
+    		return ok(views.html.twitter.row.render(createAndSaveAction(userId, ActionType.like, new Callback<Action>() {
+				@Override
+				public void invoke(Action arg) {
+					arg.replyToId = statusId;
+					arg.message = body;
 				}    			
     		})));
     	} catch (Exception e) {

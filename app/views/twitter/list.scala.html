@@ -53,7 +53,14 @@
                 </tr>
             </thead>
             <tbody>
-            	@page(query, users)                
+            	@page(query, users)        
+                @if(users.hasNext()){
+					<tr id="next-page" url="@routes.TwitterPart.ajaxUsers(query, users.getNextCursor())" isLoading="false">
+						<td colspan="3">
+							loading ...
+						</td>
+					</tr>                
+				} 	        
             </tbody>
         </table>        
     }

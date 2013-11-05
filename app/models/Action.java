@@ -14,7 +14,7 @@ public class Action extends Model {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum ActionType { beFriend, unFriend, message, retweet, publicMessage };
+	public enum ActionType { beFriend, unFriend, message, retweet, publicMessage, like };
 	public enum Service { twitter, facebook, youtube };
 	public enum Direction { receive, send, global };
 	
@@ -45,6 +45,7 @@ public class Action extends Model {
 	public Direction direction;
 	
 	public String message;
+	public Long replyToId;
 	public Date scheduledFor;
 	public Date executedAt;
 	
