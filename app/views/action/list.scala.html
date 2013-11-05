@@ -1,0 +1,39 @@
+@(query: String, page: com.avaje.ebean.Page[models.Action])
+
+@main("actions") {
+    <h1 id="query">Query: "<span style="color: #555555" id="query">@query</span>", results in @page.getTotalRowCount() entries</h1>
+    
+    <div id="twitter-actions" class="actions">
+        <form action="@request().uri()" method="GET">        	
+        	<div class="input-append" style="margin-bottom: 0px">
+	        	<input type="text" name="query" class="query" id="twitter-actions-query" value="@query">
+	        	<span class="dropdown">
+	                <button class="dropdown-toggle btn" data-toggle="dropdown" type="button"><b class="caret"></b></button>
+	                <ul class="dropdown-menu">	                 
+	                  <li><a href="#" class="pre-query-btn" query="">Recent activity first</a></li>          	                                                                                            
+	                </ul>
+	            </span>
+	            <input type="submit" id="execute" value="Execute" class="btn">
+	        </div>
+        	<input type="hidden" name="cursor" value="-1">                       
+        </form>
+    </div>
+    
+    <table class="table table-striped table-bordered table-hover">
+        <thead>
+            <tr>
+                <th class="header">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        	@views.html.action.page.render(query, page)            
+        	@if(page.hasNext()){
+				<tr id="next-page" url="@routes.ActionPart.ajaxPage(query, page.getPageIndex() + 1)" isLoading="false">
+					<td colspan="3">
+						loading ...
+					</td>
+				</tr>                
+			} 	       
+        </tbody>
+    </table>                    
+}

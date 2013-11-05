@@ -29,5 +29,9 @@ POST	/presence/ajaxUpdate/:id			controllers.PresencePart.ajaxUpdate(id: Long)
 POST	/presence/ajaxUpdateDetails/:id		controllers.PresencePart.ajaxUpdateDetails(id: Long, reloadTemplate ?= "embedded")
 GET		/presence/ajaxDetails				controllers.PresencePart.ajaxDetails(id: Long)
 
+# ActionPart
+GET		/action/list						controllers.ActionPart.list(query ?= "")
+GET 	/action/ajaxPage					controllers.ActionPart.ajaxPage(query: String, cursor: Long)
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               		controllers.Assets.at(path="/public", file)

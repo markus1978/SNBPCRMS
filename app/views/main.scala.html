@@ -25,7 +25,7 @@
 	          		<a class="brand" href="#">SNBPCRMS</a>
 	          		<div class="nav-collapse collapse">
 			            <ul class="nav">
-			            	<li @if(active=="actions"){class="active"}><a href="#">Actions</a></li>
+			            	<li @if(active=="actions"){class="active"}><a href="@routes.ActionPart.list("")">Actions</a></li>
 			            	<li @if(active=="presences"){class="active"}><a href="@routes.PresencePart.list("")">Presences</a></li>
 				        	<li @if(active=="twitter"){class="active"}><a href="@routes.TwitterPart.users("")">Twitter</a></li>
 				            <li @if(active=="youtube"){class="active"}><a href="#">Youtube</a></li>				            				            

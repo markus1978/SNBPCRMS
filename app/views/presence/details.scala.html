@@ -62,7 +62,7 @@
 	<div>	
 		@if(presence.actions.size()>0){
 			<h5 class="section">Actions</h5>
-			@views.html.presence.actions.render(presence.actions, false)
+			@views.html.action.listEmbedded.render(presence.actions, false)
 		}else{
 			<h5 class="section">No actions</h5>
 		}

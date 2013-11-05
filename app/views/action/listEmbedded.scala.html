@@ -4,7 +4,7 @@
 		@for(action <- actions) {
 			<tr>
 				<td class="action-type">
-					@views.html.presence.actionType(action)												
+					@actionType(action)												
 				</td>
 				@if(withTarget) {
 					<td class="action-target">

@@ -41,7 +41,7 @@ public class PresencePart extends Controller {
 	}
 	
 	public static Result ajaxActions(long id) {
-		return ok(views.html.presence.actions.render(Presence.find.byId(id).actions, true));
+		return ok(views.html.action.listEmbedded.render(Presence.find.byId(id).actions, true));
 	}
 	
 	public static Result ajaxUpdate(long id) {

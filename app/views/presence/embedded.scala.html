@@ -44,7 +44,7 @@
 			  	</div>
 			</div>
 			@for(action <- presence.actions.reverse.splitAt(5)._1){
-				@views.html.presence.actionType.render(action)<br/>				
+				@views.html.action.actionType.render(action)<br/>				
 			}
 			@if(presence.actions.size()>5) {
 				<span>...</span>	

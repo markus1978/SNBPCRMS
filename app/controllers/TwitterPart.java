@@ -54,7 +54,7 @@ public class TwitterPart extends Controller {
     			return ok(views.html.index.render("Could not evaluate query '" + query + "'"));
     		}
 
-    		return ok(views.html.twitter.users.render(query, result));
+    		return ok(views.html.twitter.list.render(query, result));
     	} catch (TwitterException e) { 
     		if (e.getRateLimitStatus() != null) {
     			Application.ratelimits.put("*", e.getRateLimitStatus());	
@@ -69,7 +69,7 @@ public class TwitterPart extends Controller {
     		if (result == null) {
     			return internalServerError("Could not evaluate query.");
     		}
-    		return ok(views.html.twitter.userPage.render(query, result));
+    		return ok(views.html.twitter.page.render(query, result));
     	} catch (TwitterException e) {
     		if (e.getRateLimitStatus() != null) {
     			Application.ratelimits.put("*", e.getRateLimitStatus());	
@@ -263,7 +263,7 @@ public class TwitterPart extends Controller {
     
     public static Result follow(long id) {
     	try {
-    		return ok(views.html.twitter.user.render(createAction(id, ActionType.beFriend, null)));
+    		return ok(views.html.twitter.row.render(createAction(id, ActionType.beFriend, null)));
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
     	}
@@ -271,7 +271,7 @@ public class TwitterPart extends Controller {
     
     public static Result unFollow(long id) {
     	try {
-    		return ok(views.html.twitter.user.render(createAction(id, ActionType.unFriend, null)));
+    		return ok(views.html.twitter.row.render(createAction(id, ActionType.unFriend, null)));
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
     	}
@@ -279,7 +279,7 @@ public class TwitterPart extends Controller {
     
     public static Result retweet(long userId, final long statusId) {
     	try {
-    		return ok(views.html.twitter.user.render(createAction(userId, ActionType.retweet, new Callback<Action>() {
+    		return ok(views.html.twitter.row.render(createAction(userId, ActionType.retweet, new Callback<Action>() {
 				@Override
 				public void invoke(Action arg) {
 					arg.message = Long.toString(statusId);
@@ -352,7 +352,7 @@ public class TwitterPart extends Controller {
 	    	User t4jUser = twitter().showUser(id);
 	    	Application.ratelimits.put("users/show", t4jUser.getRateLimitStatus());
 			twitterUser = TwitterUser.update(twitter(), twitterUser, t4jUser);
-			return ok(views.html.twitter.user.render(twitterUser));
+			return ok(views.html.twitter.row.render(twitterUser));
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
     	}
