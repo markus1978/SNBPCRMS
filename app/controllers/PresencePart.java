@@ -104,16 +104,22 @@ public class PresencePart extends Controller {
     	return presence;
 	}
 	
-	public static Result ajaxUpdateDetails(long id) {
+	public static Result ajaxUpdateDetails(long id, String reloadTemplate) {
 		try {
 	    	Presence presence = updatePresenceWithJson(id);
 	    	
-	    	return ok(views.html.presence.embedded.render(presence, null));
+	    	if (reloadTemplate.equals("embedded")) {
+	    		return ok(views.html.presence.embedded.render(presence, null));	
+	    	} else if (reloadTemplate.equals("row")) {
+	    		return ok(views.html.presence.row.render(presence));
+	    	} else {
+	    		return internalServerError("Unknown template.");
+	    	}	    	
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
     	}
 	}
-	
+		
 	public static Result ajaxDetails(long id) {
 		try {
 			Presence presence = Presence.find.byId(id);

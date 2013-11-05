@@ -16,7 +16,7 @@
 					@helper.select(form("tier"), options = Seq("one"->"1", "two" -> "2", "three"->"3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.id).absoluteURL(request()))
 				} 
 			</div>
-			<a href="#presence-modal@presence.id" role="button" class="load-modal-data-ajax-action" url="@routes.PresencePart.ajaxDetails(presence.id)" data-toggle="modal"><span class="icon-align-justify"></span> details</a> 
+			<a href="#presence-modal@presence.id" role="button" class="load-modal-data-ajax-action" url="@routes.PresencePart.ajaxDetails(presence.id)" data-toggle="modal"><span class="icon-list"></span> details</a> 
 			<!-- Modal -->
 			<div id="presence-modal@presence.id" class="modal hide fade presence-modal" tabindex="-1" role="dialog" aria-labelledby="presence-modal-label" aria-hidden="true">
 				<div class="modal-header">

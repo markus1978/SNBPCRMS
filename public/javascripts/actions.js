@@ -179,6 +179,7 @@ $(document).ready(function($) {
 				log("Received first timeline page successfully")
 				var modalBody = modal.find('.modal-body')
 				modalBody.html(result)
+				enableTooltips(modalBody)
 				linkifyAll(modalBody.get(), "linkify")
 			},
 			error: function(xhr, status, error) {
@@ -194,6 +195,12 @@ $(document).ready(function($) {
 		window.open(url,'new')
 	})
 })
+
+function enableTooltips(container) {
+	$(container).find('[rel="tooltip"]').each(function(index, value) {
+		$(value).tooltip();
+	})
+}
 
 var doNotPull = false;
 function pullLog() {

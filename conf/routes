@@ -26,7 +26,7 @@ GET 	/presence/ajaxPage					controllers.PresencePart.ajaxPage(query: String, cur
 GET		/presence/ajaxEmbedded				controllers.PresencePart.ajaxEmbedded(id: Long)
 GET 	/presence/ajaxActions				controllers.PresencePart.ajaxActions(id: Long)
 POST	/presence/ajaxUpdate/:id			controllers.PresencePart.ajaxUpdate(id: Long)
-POST	/presence/ajaxUpdateDetails/:id		controllers.PresencePart.ajaxUpdateDetails(id: Long)
+POST	/presence/ajaxUpdateDetails/:id		controllers.PresencePart.ajaxUpdateDetails(id: Long, reloadTemplate ?= "embedded")
 GET		/presence/ajaxDetails				controllers.PresencePart.ajaxDetails(id: Long)
 
 # Map static resources from the /public folder to the /assets URL path

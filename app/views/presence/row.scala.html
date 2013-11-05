@@ -1,6 +1,34 @@
 @(presence: models.Presence)
-<tr>
+<tr class="presence-holder">
 	<td>
-		@views.html.presence.embedded.render(presence, null)
+		<b>@presence.name</b><!-- 
+		@if(presence.category!=models.Presence.Category.notAssigned){--><span>, category: <i>@presence.category</i></span><!--}else{--><!--}
+		@if(presence.tier!=models.Presence.Tier.notAssigned){--><span>, tier: <i>@presence.tier</i></span>}else{-->}
+		@if(presence.iOS){<span class="label">iOS</span>}
+		@if(presence.android){<span class="label">android</span>}
+		@if(presence.pc){<span class="label">pc</span>}
+		@if(presence.consoles){<span class="label">consoles</span>}
+		@if(presence.more){<span class="label">more</span>}
+		@if(presence.getChannelURLs().size()>0){@presence.getChannelURLs().size() channel (<!-- 
+			@if(presence.twitterUser!=null){ --><span class="label"><span class="social-icon-twitter"></span></span><!--}
+			-->)
+		}
+		@if(presence.getContactURLs().size()>0){@presence.getContactURLs().size() contacts}
+	</td>
+	<td>
+		<a href="#presence-modal@presence.id" role="button" class="btn btn-mini load-modal-data-ajax-action" url="@routes.PresencePart.ajaxDetails(presence.id)" data-toggle="modal"><span class="icon-list"></span> details</a> 
+			<!-- Modal -->
+			<div id="presence-modal@presence.id" class="modal hide fade presence-modal" tabindex="-1" role="dialog" aria-labelledby="presence-modal-label" aria-hidden="true">
+				<div class="modal-header">
+			    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			    	<h3 id="presence-modal-label">Presence data of <b>@presence.name</b></h3>
+			  	</div>
+			  	<div class="modal-body">
+			  	</div>
+			  	<div class="modal-footer">
+    				<a href="#" class="btn" data-dismiss="modal" aria-hidden="true">Close</a>
+    				<a href="#" class="btn btn-primary reload-ajax-action" data-dismiss="modal" aria-hidden="true" url="@routes.PresencePart.ajaxUpdateDetails(presence.id, "row")" holder-class="presence-holder" ajax-data="presence-details-data-@presence.id">Save changes</a>
+  				</div>
+			</div>
 	</td>
 </tr>	
