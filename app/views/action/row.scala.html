@@ -1,6 +1,26 @@
-@(action: models.Action)
-<tr class="presence-holder">
-	<td>
-		@actionType(action)
+@(action: models.Action, withTarget: Boolean)
+<tr class="action-holder">
+	<td class="action-type">
+		@actionType(action)												
+	</td>
+	@if(withTarget) {
+		<td class="action-target">
+			<!-- target  --> 
+			@if(action.service==models.Action.Service.twitter){
+				@views.html.twitter.embeddedSmall(action.target.twitterUser)
+			}
+		</td>
+	}
+	<td class="action-body">
+		<!-- body  --> 
+		@if(action.message == null || action.message.trim().equals("")) {
+			<span class="unimportant">This action has not message.</span>	
+		}else{
+			<p class="linkify">@action.message</p>
+		}
+	</td>
+	<td class="action-follow-ups">
+		<!-- follow up actions -->
+		<span class="unimportant">No available follow up actions.</span>
 	</td>
 </tr>	
