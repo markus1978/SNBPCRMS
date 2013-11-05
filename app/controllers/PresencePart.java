@@ -18,6 +18,7 @@ public class PresencePart extends Controller {
     	Page<Presence> page = null;
     	try {
 	    	page = Presence.find
+	    		.orderBy("lastActivity desc")
 	    		.findPagingList(20)
 	    		.setFetchAhead(false)
 	    		.getPage(0);			
@@ -31,6 +32,7 @@ public class PresencePart extends Controller {
 		Page<Presence> page = null;
     	try {
 	    	page = Presence.find
+	    		.orderBy("lastActivity desc")
 	    		.findPagingList(20)
 	    		.setFetchAhead(false)
 	    		.getPage((int)cursor);			
@@ -38,10 +40,6 @@ public class PresencePart extends Controller {
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
     	}
-	}
-	
-	public static Result ajaxActions(long id) {
-		return ok(views.html.action.listEmbedded.render(Presence.find.byId(id).actions, true));
 	}
 	
 	public static Result ajaxUpdate(long id) {

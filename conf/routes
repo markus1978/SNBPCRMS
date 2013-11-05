@@ -23,13 +23,15 @@ GET 	/twitter/unfollow					controllers.TwitterPart.unFollow(id: Long)
 GET		/twitter/retweet					controllers.TwitterPart.retweet(userId: Long, statusId: Long)
 GET		/twitter/ajaxCreateDirectMessage	controllers.TwitterPart.ajaxCreateDirectMessage(targetId: Long)
 POST	/twitter/ajaxSendDirectMessage		controllers.TwitterPart.ajaxSendDirectMessage(targetId: Long)
-
+GET		/twitter/ajaxCreateMentionTweet		controllers.TwitterPart.ajaxCreateMentionTweet(targetId: Long)
+POST	/twitter/ajaxSendMentionTweet		controllers.TwitterPart.ajaxSendMentionTweet(targetId: Long)
+GET		/action/ajaxCreateTweet				controllers.TwitterPart.ajaxCreateTweet()
+POST	/action/ajaxSendTweet				controllers.TwitterPart.ajaxSendTweet()
 
 # PresencePart
 GET		/presence/list						controllers.PresencePart.list(query ?= "")
 GET 	/presence/ajaxPage					controllers.PresencePart.ajaxPage(query: String, cursor: Long)
 GET		/presence/ajaxEmbedded				controllers.PresencePart.ajaxEmbedded(id: Long)
-GET 	/presence/ajaxActions				controllers.PresencePart.ajaxActions(id: Long)
 POST	/presence/ajaxUpdate/:id			controllers.PresencePart.ajaxUpdate(id: Long)
 POST	/presence/ajaxUpdateDetails/:id		controllers.PresencePart.ajaxUpdateDetails(id: Long, reloadTemplate ?= "embedded")
 GET		/presence/ajaxDetails				controllers.PresencePart.ajaxDetails(id: Long)
@@ -37,6 +39,7 @@ GET		/presence/ajaxDetails				controllers.PresencePart.ajaxDetails(id: Long)
 # ActionPart
 GET		/action/list						controllers.ActionPart.list(query ?= "")
 GET 	/action/ajaxPage					controllers.ActionPart.ajaxPage(query: String, cursor: Long)
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               		controllers.Assets.at(path="/public", file)

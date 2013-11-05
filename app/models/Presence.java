@@ -59,6 +59,8 @@ public class Presence extends Model {
 	@Transient
 	public List<String> contactURLs;
 	
+	public Date lastActivity = new Date();
+	
 	private String serializeURLs(List<String> urls) {
 		StringBuffer result = new StringBuffer();
 		for (String url: urls) {

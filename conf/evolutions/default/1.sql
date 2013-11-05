@@ -31,6 +31,7 @@ create table presence (
   name                      varchar(255),
   channel_urls_blob         varchar(255),
   contact_urls_blob         varchar(255),
+  last_activity             timestamp,
   added                     timestamp,
   constraint ck_presence_tier check (tier in (0,1,2,3)),
   constraint ck_presence_category check (category in (0,1,2,3)),

@@ -1,20 +1,33 @@
 @(action: models.Action, withTarget: Boolean)
 <tr class="action-holder">
 	<td class="action-type">
-		@actionType(action)												
+		@actionType(action)<br/>
+		<span class="unimportant">[@action.scheduledFor.format("HH:mm dd/mm/yy")]</span>												
 	</td>
 	@if(withTarget) {
 		<td class="action-target">
 			<!-- target  --> 
-			@if(action.service==models.Action.Service.twitter){
-				@views.html.twitter.embeddedSmall(action.target.twitterUser)
+			@if(action.service==models.Action.Service.twitter){					
+				@if(action.target == null || action.target.twitterUser == null) {
+					@if(action.direction==models.Action.Direction.global){
+						<div class="well">
+							<em>Global action not targeted at a distinct presence.</em>
+						</div>
+					}else{
+						<div class="well">
+							<em class="text-error">The action has no target, or the target no twitter user. This should not have happened.</em>
+						</div>
+					}	
+				}else{
+					@views.html.twitter.embeddedSmall(action.target.twitterUser)
+				}
 			}
 		</td>
 	}
 	<td class="action-body">
 		<!-- body  --> 
 		@if(action.message == null || action.message.trim().equals("")) {
-			<span class="unimportant">This action has not message.</span>	
+			<span class="unimportant">This action has no message body.</span>	
 		}else{
 			<p class="linkify">@action.message</p>
 		}

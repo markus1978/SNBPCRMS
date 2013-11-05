@@ -29,10 +29,21 @@
 	<span class="unimportant">[@twitterUser.lastUpdated.format("HH:mm dd/mm/yy")]</span>
 
 	@if(withActions){
-		<div id="send-direct-message-data-@twitterUser.id">
-			@modalButton(twitterUser.id, routes.TwitterPart.ajaxCreateDirectMessage(twitterUser.id).absoluteURL(request()), "Send direct message to " + twitterUser.screenName, routes.TwitterPart.ajaxSendDirectMessage(twitterUser.id).absoluteURL(request()), "twitter-holder-"+twitterUser.id, "send-direct-message-data-"+twitterUser.id){
-				<span class="icon-envelope"></span> direct message	
-			}		
-		</div>
+		@modalButton(
+				"mention-" + twitterUser.id, 
+				"Mention @" + twitterUser.screenName,
+				routes.TwitterPart.ajaxCreateMentionTweet(twitterUser.id).absoluteURL(request()), 
+				routes.TwitterPart.ajaxSendMentionTweet(twitterUser.id).absoluteURL(request()), 
+				"twitter-holder-"+twitterUser.id){
+			<span class="icon-envelope"></span> mention	
+		}
+		@modalButton(
+				"direct-message-" + twitterUser.id, 
+				"Send direct message to " + twitterUser.screenName,
+				routes.TwitterPart.ajaxCreateDirectMessage(twitterUser.id).absoluteURL(request()), 
+				routes.TwitterPart.ajaxSendDirectMessage(twitterUser.id).absoluteURL(request()), 
+				"twitter-holder-"+twitterUser.id){
+			<span class="icon-envelope"></span> direct message	
+		}		
 	}
 </div> 

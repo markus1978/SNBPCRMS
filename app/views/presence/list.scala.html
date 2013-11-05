@@ -19,21 +19,27 @@
         </form>
     </div>
     
-    <table class="table table-striped table-bordered table-hover">
-        <thead>
-            <tr>
-                <th class="header">Presences</th>
-                <th class="header"></th>
-            </tr>
-        </thead>
-        <tbody>
-        	@views.html.presence.page.render(query, page)            
-        	@if(page.hasNext()){
-			<tr id="next-page" url="@routes.PresencePart.ajaxPage(query, page.getPageIndex() + 1)" isLoading="false">
-				<td colspan="3">
-					loading ...
-				</td>
-			</tr>                } 	       
-        </tbody>
-    </table>                    
+    @if(page.getTotalRowCount() == 0) {  
+        <div class="well">
+            <em>Nothing matches the query</em>
+        </div>
+    } else {
+	    <table class="table table-striped table-bordered table-hover">
+	        <thead>
+	            <tr>
+	                <th class="header">Presences</th>
+	                <th class="header"></th>
+	            </tr>
+	        </thead>
+	        <tbody>
+	        	@views.html.presence.page.render(query, page)            
+	        	@if(page.hasNext()){
+				<tr id="next-page" url="@routes.PresencePart.ajaxPage(query, page.getPageIndex() + 1)" isLoading="false">
+					<td colspan="3">
+						loading ...
+					</td>
+				</tr>                } 	       
+	        </tbody>
+	    </table>
+	}                    
 }

@@ -58,13 +58,15 @@ public class TwitterUserPage extends ArrayList<TwitterUser> {
 			ids[i++] = myTwitterUser.id;
 		}
 		
-		ResponseList<User> twitterUsers = twitter.lookupUsers(ids);
-		Application.ratelimits.put("users/lookup", twitterUsers.getRateLimitStatus());
-
-		i = 0;
-		for (TwitterUser myTwitterUser: myTwitterUsersList) {
-			User twitterUser = twitterUsers.get(i++);
-			result.add(TwitterUser.update(twitter, myTwitterUser, twitterUser));
+		if (ids.length > 0) {
+			ResponseList<User> twitterUsers = twitter.lookupUsers(ids);
+			Application.ratelimits.put("users/lookup", twitterUsers.getRateLimitStatus());
+	
+			i = 0;
+			for (TwitterUser myTwitterUser: myTwitterUsersList) {
+				User twitterUser = twitterUsers.get(i++);
+				result.add(TwitterUser.update(twitter, myTwitterUser, twitterUser));
+			}
 		}
 		return result;
 	}

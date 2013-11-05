@@ -54,7 +54,12 @@ $(document).ready(function($) {
 	    });
 	})
 	$('#container').on('change', '.ajax-form', function() {		
-		formElements = $(this).parents('.ajax-form-holder').find(':input')
+		var dataId = $(this).attr('ajax-data')
+		if (dataId != undefined) {
+			formElements = $('#'+dataId).find(':input')
+		} else {
+			formElements = $(this).parents('.ajax-form-holder').find(':input')
+		}
 		formElements.prop('disabled', true)
 		var data = {}
 		form = $(this)
@@ -109,6 +114,47 @@ $(document).ready(function($) {
 		}
 		$(elements[elements.length-1]).attr('style', 'visibility:visible;')
 	})	
+	$('#container').on('click', '.post-ajax-action', function() {
+		var self = $(this)
+		var dataId = $(this).attr('ajax-data')
+		if (dataId != undefined) {
+			formElements = $('#'+dataId).find(':input')
+		} else {
+			formElements = $(this).parents('.ajax-form-holder').find(':input')
+		}
+		var jsonData = {};
+		$.map(formElements, function(n, i) {
+			var value = $(n).val();
+			if ($(n).is(':checkbox')) {
+				value = $(n).prop('checked')
+			}
+			if (jsonData[n.name] !== undefined) {
+	            if (!jsonData[n.name].push) {
+	            	jsonData[n.name] = [jsonData[n.name]];
+	            }
+	            jsonData[n.name].push(value || '');
+	        } else {
+	        	jsonData[n.name] = value || '';
+	        }
+		});	
+		$.ajax({
+	        url: $(this).attr('url'),
+	        type : 'POST',
+	        contentType : 'text/json',
+	        data: JSON.stringify(jsonData),
+	        success: function(result, status, xhr) {
+	        	var logMessage = self.attr('ajax-log-message')
+	        	if (logMessage == undefined) {
+	        		log(result)
+	        	} else {
+	        		log(result + ": " + logMessage)
+	        	}	        	
+	        },
+	        error: function(errorThrown){
+	        	error(errorThrown);
+	        }
+		})
+	})
 	$('#container').on('click', '.reload-ajax-action', function() {
 		var holder = $(this).parents(($(this).attr('holder-id') == undefined) ? '.'+ $(this).attr('holder-class') : '#' + $(this).attr('holder-id'))
 		var button = $(this)

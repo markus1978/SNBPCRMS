@@ -1,12 +1,16 @@
 @(presence: models.Presence, createURL: String)
+@import views.html.helpers._
 @import utils.Let._
 @import play.data.Form
-<div class="presence-holder">
-	@if(presence == null){			
+
+@if(presence == null){			
+	<div class="presence-holder">
 		<a class="btn btn-mini reload-ajax-action" holder-class="presence-holder" url="@createURL"><span class="icon-file"></span> create</a>
 		<a class="btn btn-mini"><span class="icon-search"></span> assign</a>
 		<p class="help"><span class="icon-info-sign"></span> No presence assigned for this twitter user. Calling any action will create a new one.<p/>
-	}else{
+	</div>
+}else{
+	<div id="presence-holder-@presence.id" class="presence-holder">
 		<div>				
 			<div class="ajax-form-holder presence-embedded-form">
 				@let(Form.form(classOf[Presence]).fill(presence)){ form =>
@@ -16,43 +20,25 @@
 					@helper.select(form("tier"), options = Seq("one"->"1", "two" -> "2", "three"->"3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.id).absoluteURL(request()))
 				} 
 			</div>
-			<a href="#presence-modal@presence.id" role="button" class="load-modal-data-ajax-action" url="@routes.PresencePart.ajaxDetails(presence.id)" data-toggle="modal"><span class="icon-list"></span> details</a> 
-			<!-- Modal -->
-			<div id="presence-modal@presence.id" class="modal hide fade presence-modal" tabindex="-1" role="dialog" aria-labelledby="presence-modal-label" aria-hidden="true">
-				<div class="modal-header">
-			    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			    	<h3 id="presence-modal-label">Presence data of <b>@presence.name</b></h3>
-			  	</div>
-			  	<div class="modal-body">
-			  	</div>
-			  	<div class="modal-footer">
-    				<a href="#" class="btn" data-dismiss="modal" aria-hidden="true">Close</a>
-    				<a href="#" class="btn btn-primary reload-ajax-action" data-dismiss="modal" aria-hidden="true" url="@routes.PresencePart.ajaxUpdateDetails(presence.id)" holder-class="presence-holder" ajax-data="presence-details-data-@presence.id">Save changes</a>
-  				</div>
-			</div>
+			@modalButton(
+					"presence-details-model-" + presence.id, 
+					"Presence data of " + presence.name, 
+					routes.PresencePart.ajaxDetails(presence.id).absoluteURL(request()), 
+					routes.PresencePart.ajaxUpdateDetails(presence.id).absoluteURL(request()), 
+					"presence-holder-"+presence.id) {  
+				<span class="icon-list"></span> details</a>
+			}					
 		</div>
 		<div>	
-		@if(presence.actions.size()>0){
-			Actions: <a href="#general-data-actions-modal@presence.id" role="button" class="load-modal-data-ajax-action" url="@routes.PresencePart.ajaxActions(presence.id)" data-toggle="modal">@presence.actions.size()</a>:<br/>
-			<!-- Modal -->
-			<div id="general-data-actions-modal@presence.id" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="general-data-actions-modal-label" aria-hidden="true">
-				<div class="modal-header">
-			    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			    	<h3 id="general-data-actions-modal">Actions with <b>@presence.name</b></h3>
-			  	</div>
-			  	<div class="modal-body">
-			  	</div>
-			</div>
+			Actions: @if(presence.actions.size()>0){@presence.actions.size()}else{none}<br/>			
 			@for(action <- presence.actions.reverse.splitAt(5)._1){
 				@views.html.action.actionType.render(action)<br/>				
 			}
 			@if(presence.actions.size()>5) {
 				<span>...</span>	
 			}
-		}else{
-			<span>no Actions</span>
-		}
-		</div>		
-	}	
-</div>		
+		</div>
+	</div>		
+}	
+		
 

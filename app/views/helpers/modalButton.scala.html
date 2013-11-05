@@ -1,6 +1,6 @@
-@(id: Long, loadURL: String, title: String, commitURL: String=null, reloadId: String=null, dataId: String=null)(content:Html)
+@(id: String, title: String, loadURL: String, commitURL: String=null, reloadId: String=null, aClass: String="btn btn-mini")(content:Html)
 
-<a href="#@id" role="button" class="btn btn-mini load-modal-data-ajax-action" url="@loadURL" data-toggle="modal">@content</a> 
+<a href="#@id" role="button" class="@aClass load-modal-data-ajax-action" url="@loadURL" data-toggle="modal">@content</a> 
 
 <!-- Modal -->
 <div id="@id" class="modal hide fade presence-modal" tabindex="-1" role="dialog" aria-labelledby="@id-label" aria-hidden="true">
@@ -9,11 +9,14 @@
     	<h3 id="@id-label">@title</h3>
   	</div>
   	<div class="modal-body">
+  		<div class="well">
+  			<em>loading...</em>
+  		</div>
   	</div>
   	@if(commitURL!=null){
 	  	<div class="modal-footer">
 	 		<a href="#" class="btn" data-dismiss="modal" aria-hidden="true">Close</a>
-	 		<a href="#" class="btn btn-primary reload-ajax-action" data-dismiss="modal" aria-hidden="true" url="@commitURL" holder-id="@reloadId" ajax-data="@dataId">Save changes</a>
+	 		<a href="#" class="btn btn-primary @if(reloadId!=null){reload-ajax-action}else{post-ajax-action}" @if(reloadId==null){ajax-log-message="@title successful"}data-dismiss="modal" aria-hidden="true" url="@commitURL" @if(reloadId!=null){holder-id="@reloadId"} ajax-data="@id">Save changes</a>
 		</div>
 	}
 </div>

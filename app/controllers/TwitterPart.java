@@ -1,9 +1,7 @@
 package controllers;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 
 import models.Action;
@@ -60,11 +58,8 @@ public class TwitterPart extends Controller {
     		}
 
     		return ok(views.html.twitter.list.render(query, result));
-    	} catch (TwitterException e) { 
-    		if (e.getRateLimitStatus() != null) {
-    			Application.ratelimits.put("*", e.getRateLimitStatus());	
-    		}    		
-    		return ok(views.html.index.render("Something went wrong: " + e.getErrorMessage() + ". Retry at " + new Date(e.getRateLimitStatus().getResetTimeInSeconds()*(long)1000)));
+    	} catch (Exception e) {   		
+    		return ok(views.html.index.render("Exception: " + e.getMessage()));
     	}
     }
     
@@ -75,11 +70,8 @@ public class TwitterPart extends Controller {
     			return internalServerError("Could not evaluate query.");
     		}
     		return ok(views.html.twitter.page.render(query, result));
-    	} catch (TwitterException e) {
-    		if (e.getRateLimitStatus() != null) {
-    			Application.ratelimits.put("*", e.getRateLimitStatus());	
-    		}   
-    		return internalServerError("Twitter exception: " + e.getMessage());
+    	} catch (Exception e) {    		
+    		return internalServerError("Exception: " + e.getMessage());
     	}
     }
     
@@ -103,30 +95,37 @@ public class TwitterPart extends Controller {
     	}
     }
 
-    private static TwitterUserPage evaluateQuery(String query, long cursor, boolean runInBackground) throws TwitterException {
-    	TwitterUserPage result = null;
-    	if (query.trim().equals("")) {
-    		result = friends(TwitterMe.instance(twitter()).screenName(), cursor, runInBackground);
-    	} else if (query.startsWith("friends:")) {
-			String screenName = query.substring("friends:".length()).trim();
-			result = friends(screenName, cursor, runInBackground);
-		} else if (query.startsWith("followers:")) {
-			String screenName = query.substring("followers:".length()).trim();
-			result = followers(screenName, cursor, runInBackground);
-		} else if (query.startsWith("suggested:")) {
-			String categorySlug = query.substring("suggested:".length()).trim();
-			if (categorySlug.equals("")) {
-				categorySlug = null;
+    private static TwitterUserPage evaluateQuery(String query, long cursor, boolean runInBackground) throws Exception {
+    	try {
+	    	TwitterUserPage result = null;
+	    	if (query.trim().equals("")) {
+	    		result = friends(TwitterMe.instance(twitter()).screenName(), cursor, runInBackground);
+	    	} else if (query.startsWith("friends:")) {
+				String screenName = query.substring("friends:".length()).trim();
+				result = friends(screenName, cursor, runInBackground);
+			} else if (query.startsWith("followers:")) {
+				String screenName = query.substring("followers:".length()).trim();
+				result = followers(screenName, cursor, runInBackground);
+			} else if (query.startsWith("suggested:")) {
+				String categorySlug = query.substring("suggested:".length()).trim();
+				if (categorySlug.equals("")) {
+					categorySlug = null;
+				}
+				result = suggestions(categorySlug, runInBackground);
+			} else {
+				String sql = query.trim();
+				result = sql(sql, cursor, runInBackground);
+				if (result == null) {
+					Application.log.add("Could not execute query '" + query + "'");
+				}
 			}
-			result = suggestions(categorySlug, runInBackground);
-		} else {
-			String sql = query.trim();
-			result = sql(sql, cursor, runInBackground);
-			if (result == null) {
-				Application.log.add("Could not execute query '" + query + "'");
-			}
-		}
-		return result;
+			return result;
+    	} catch (TwitterException e) {
+    		if (e.getRateLimitStatus() != null) {
+    			Application.ratelimits.put("*", e.getRateLimitStatus());	
+    		}   
+    		throw e;
+    	}
     }
     
     public static Result importAll(final String query) {
@@ -260,15 +259,13 @@ public class TwitterPart extends Controller {
     		if (e.getRateLimitStatus() != null) {
     			Application.ratelimits.put("*", e.getRateLimitStatus());	
     		}   
-    		return null;
-    	} catch (Exception e) {
-    		return null;
-    	}
+    		throw e;
+    	}     	
     }
     
     public static Result follow(long id) {
     	try {
-    		return ok(views.html.twitter.row.render(createAction(id, ActionType.beFriend, null)));
+    		return ok(views.html.twitter.row.render(createAndSaveAction(id, ActionType.beFriend, null)));
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
     	}
@@ -276,7 +273,7 @@ public class TwitterPart extends Controller {
     
     public static Result unFollow(long id) {
     	try {
-    		return ok(views.html.twitter.row.render(createAction(id, ActionType.unFriend, null)));
+    		return ok(views.html.twitter.row.render(createAndSaveAction(id, ActionType.unFriend, null)));
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
     	}
@@ -284,7 +281,7 @@ public class TwitterPart extends Controller {
     
     public static Result retweet(long userId, final long statusId) {
     	try {
-    		return ok(views.html.twitter.row.render(createAction(userId, ActionType.retweet, new Callback<Action>() {
+    		return ok(views.html.twitter.row.render(createAndSaveAction(userId, ActionType.retweet, new Callback<Action>() {
 				@Override
 				public void invoke(Action arg) {
 					arg.message = Long.toString(statusId);
@@ -298,10 +295,31 @@ public class TwitterPart extends Controller {
     public static Result ajaxCreateDirectMessage(long targetId) {
     	try {
     		TwitterUser twitterUser = TwitterUser.find.byId(targetId);
-    		Action action = createAction(twitterUser, ActionType.message);
+    		Action action = createAction(ActionType.message);
+    		action.target = twitterUser.getPresence();		
+			return ok(views.html.action.details.render(action, true));
+    	} catch (Exception e) {
+    		return internalServerError(e.getMessage());
+    	}
+    }
+    
+    public static Result ajaxCreateMentionTweet(long targetId) {
+    	try {
+    		TwitterUser twitterUser = TwitterUser.find.byId(targetId);
+    		Action action = createAction(ActionType.publicMessage);
     		action.target = twitterUser.getPresence();
-    		twitterUser.save();    		
-			return ok(views.html.action.details.render(action));
+    		action.message = "@" + twitterUser.screenName + " ";   		
+			return ok(views.html.action.details.render(action, true));
+    	} catch (Exception e) {
+    		return internalServerError(e.getMessage());
+    	}
+    }
+    
+    public static Result ajaxCreateTweet() {
+    	try {
+    		Action action = createAction(ActionType.publicMessage);
+    		action.direction = Direction.global;
+			return ok(views.html.action.details.render(action, true));
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
     	}
@@ -311,7 +329,7 @@ public class TwitterPart extends Controller {
     	void invoke(T arg);
     }
     
-    private static Action createAction(TwitterUser twitterUser, ActionType actionType) {    
+    private static Action createAction(ActionType actionType) {    
     	final Action action = new Action();
     	action.service = Service.twitter;
     	action.direction = Direction.send;
@@ -321,22 +339,6 @@ public class TwitterPart extends Controller {
     	action.executed = false;
 		    	
     	return action;
-    }
-    
-    private static TwitterUser createAction(long id, ActionType actionType, Callback<Action> editAction) throws TwitterException {    	
-    	final TwitterUser twitterUser = TwitterUser.find.byId(id);
-    	
-    	final Action action = createAction(twitterUser, actionType);
-    	if (editAction != null) {
-    		editAction.invoke(action);
-    	}
-    	
-    	twitterUser.getPresence().actions.add(action);
-    	twitterUser.getPresence().save();
-    	twitterUser.save();
-    	User t4jUser = twitter().showUser(id);       
-    	Application.ratelimits.put("users/show", t4jUser.getRateLimitStatus());
-    	return TwitterUser.update(twitter, twitterUser, t4jUser);
     }
     
     public static Result createPresence(long id) {
@@ -381,23 +383,81 @@ public class TwitterPart extends Controller {
     }
 	
 	public static Result ajaxSendDirectMessage(long targetId) {
-    	TwitterUser twitterUser = TwitterUser.find.byId(targetId);
-    	Action action = createAction(twitterUser, ActionType.message);
-    	
-    	JsonNode json = request().body().asJson();    
-    	Iterator<Entry<String, JsonNode>> fields = json.fields();    	
-    	while (fields.hasNext()) {
-			Entry<String, JsonNode> next = fields.next();
-			String key = next.getKey();
-			if (key.equals("message")) {
-				action.message = next.getValue().asText();
-			} 
-		}
-
-    	twitterUser.getPresence().actions.add(action);
-    	twitterUser.getPresence().save();
-    	action.save();
-    	    	
-		return ok(views.html.twitter.row.render(twitterUser));
+		return ajaxSendMessage(targetId, ActionType.message);
 	}
+	
+	public static Result ajaxSendMentionTweet(long targetId) {
+		return ajaxSendMessage(targetId, ActionType.publicMessage);
+	}
+	
+	public static Result ajaxSendTweet() {
+		try {
+			Action action = createAction(ActionType.publicMessage);
+			action.direction = Direction.global;
+			
+			JsonNode json = request().body().asJson();    
+	    	Iterator<Entry<String, JsonNode>> fields = json.fields();
+	    	while (fields.hasNext()) {
+				Entry<String, JsonNode> next = fields.next();
+				String key = next.getKey();
+				if (key.equals("message")) {
+					action.message = next.getValue().asText();
+				} 
+			}
+	    	
+	    	action.save();
+	
+	    	return ok("");
+		} catch (Exception e) {
+			return internalServerError(e.getMessage());
+		}
+	}
+	
+	private static Result ajaxSendMessage(long targetId, ActionType actionType) {
+		try {
+	    	TwitterUser twitterUser = createAndSaveAction(targetId, actionType, new Callback<Action>() {
+				@Override
+				public void invoke(Action action) {
+					JsonNode json = request().body().asJson();    
+			    	Iterator<Entry<String, JsonNode>> fields = json.fields();
+			    	while (fields.hasNext()) {
+						Entry<String, JsonNode> next = fields.next();
+						String key = next.getKey();
+						if (key.equals("message")) {
+							action.message = next.getValue().asText();
+						} 
+					}					
+				}
+	    		
+	    	});
+	    	
+	    	return ok(views.html.twitter.row.render(twitterUser));
+		} catch (Exception e) {
+			return internalServerError(e.getMessage());
+		}
+	}
+	
+    private static TwitterUser createAndSaveAction(long id, ActionType actionType, Callback<Action> editAction) throws TwitterException {    	
+    	final TwitterUser twitterUser = TwitterUser.find.byId(id);    	
+    	final Action action = createAction(actionType);
+    	
+    	if (editAction != null) {
+    		editAction.invoke(action);
+    	}
+    	
+    	Presence presence = twitterUser.getPresence();
+    	presence.actions.add(action);
+		presence.actions = presence.actions;
+		if (presence.lastActivity.getTime() < action.scheduledFor.getTime()) {
+			presence.lastActivity = action.scheduledFor;
+		}
+    	    	
+    	presence.save();
+    	action.save();    	
+    	twitterUser.save();
+    	    	
+    	User t4jUser = twitter().showUser(id);       
+    	Application.ratelimits.put("users/show", t4jUser.getRateLimitStatus());
+    	return TwitterUser.update(twitter, twitterUser, t4jUser);
+    }
 }

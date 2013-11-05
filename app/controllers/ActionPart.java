@@ -10,7 +10,8 @@ public class ActionPart extends Controller {
 	public static Result list(String query) {    	    	
     	Page<Action> page = null;
     	try {
-	    	page = Action.find
+	    	page = Action.find	    		
+	    		.orderBy("scheduledFor desc")
 	    		.findPagingList(20)
 	    		.setFetchAhead(false)
 	    		.getPage(0);			
@@ -24,6 +25,7 @@ public class ActionPart extends Controller {
 		Page<Action> page = null;
     	try {
 	    	page = Action.find
+	    		.orderBy("scheduledFor desc")
 	    		.findPagingList(20)
 	    		.setFetchAhead(false)
 	    		.getPage((int)cursor);			
