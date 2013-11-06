@@ -1,4 +1,6 @@
 @(action: models.Action, fixedConfiguration:Boolean)
+@import models.Action
+@import models.Action._
 @import utils.Let._
 @import play.data.Form
 @import helper.{FieldConstructor, inputText, select}
@@ -12,7 +14,7 @@
 }
 
 <div class="action-details">	
-	@if(action.target != null && action.service == models.Action.Service.twitter){
+	@if(action.target != null && action.service == Service.twitter){
 		<div class="row-fluid">
 		@views.html.twitter.embeddedSmall(action.target.twitterUser)
 		@if(!fixedConfiguration) {
@@ -21,7 +23,7 @@
 		</div>
 	}											
 	<div class="row-fluid">
-		@let(Form.form(classOf[models.Action]).fill(action)){ form =>
+		@let(Form.form(classOf[Action]).fill(action)){ form =>
 			<div class="form-horizontal action-config-column">
 				<h5 class="section">Configuration</h5>  
 				@if(fixedConfiguration){

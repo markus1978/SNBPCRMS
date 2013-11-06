@@ -1,44 +1,33 @@
 package models;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Indexed;
+import org.mongodb.morphia.annotations.Reference;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.utils.IndexDirection;
 
-import play.data.validation.Constraints;
-import play.db.ebean.Model;
+import utils.DataStoreConnection;
+
 
 @Entity
-public class Presence extends Model {
-
-	private static final long serialVersionUID = 1L;
+public class Presence {
 	
 	public enum Tier { one, two, three, notAssigned };
 	public enum Category { publication, developer, user, notAssigned };
 	public enum Status { neutral, wishlist, ignored, notAssigned };
+	 	
+	@Id private ObjectId id;
 	
-	public static Finder<Long,Presence> find = new Finder<Long,Presence>(Long.class, Presence.class); 
+	@Reference public TwitterUser twitterUser;	
+	@Reference public List<Action> actions = new ArrayList<Action>();
 	
-	@Id
-	public Long id;
-	
-	@OneToOne(mappedBy="presence")
-	public TwitterUser twitterUser;
-	
-	@OneToMany(mappedBy="target", cascade=CascadeType.ALL)
-	public List<Action> actions = new ArrayList<Action>();
-	
-	@Constraints.Required
 	public Tier tier = Tier.notAssigned;
-	
-	@Constraints.Required
 	public Category category = Category.notAssigned;
 	
 	public boolean iOS = false;	
@@ -47,55 +36,47 @@ public class Presence extends Model {
 	public boolean consoles = false;
 	public boolean more = false;
 	
-	@Constraints.Required
-	public String name;
-	    
-	public String channelURLsBlob = "";
+	public String name;    
+	public List<String> channelURLs = new ArrayList<String>();
+	public List<String> contactURLs = new ArrayList<String>();
+			
+	@Indexed(value=IndexDirection.DESC) public Date lastActivity;				
+	@Indexed(value=IndexDirection.DESC) public Date added;
 	
-	public String contactURLsBlob = "";
-	
-	@Transient
-	public List<String> channelURLs;
-	@Transient
-	public List<String> contactURLs;
-	
-	public Date lastActivity = new Date();
-	
-	private String serializeURLs(List<String> urls) {
-		StringBuffer result = new StringBuffer();
-		for (String url: urls) {
-			url = url.trim();
-			if (url.length() > 0) {
-				result.append(url);
-				result.append("%&§");
-			}
-		}
-		return result.toString();
+	public static Presence create(TwitterUser twitterUser) {		
+		Presence presence = new Presence();
+		presence.name = twitterUser.screenName;
+		presence.added = new Date();
+		presence.lastActivity = presence.added;
+		presence.channelURLs.add(TwitterUser.getProfileURL(twitterUser));
+		presence.twitterUser = twitterUser;
+		return presence;
 	}
 	
-	private List<String> deserializeURLs(String urlString) {
-		return Arrays.asList(urlString.split("%&§"));
+	public void save() {
+		DataStoreConnection.datastore().save(this);
 	}
 	
-	public void setChannelURLs(List<String> urls) {		
-		channelURLsBlob = serializeURLs(urls);
+	public static Page<Presence> find(int count, int offset) {
+		Query<Presence> query = DataStoreConnection.datastore()
+				.find(Presence.class)
+				.order("-lastActivity")
+				.offset(offset)
+				.limit(count)
+				.disableCursorTimeout();
+		
+		return new MongoDBPage<Presence>(query);
 	}
 	
-	public void setContactURLs(List<String> urls) {		
-		contactURLsBlob = serializeURLs(urls);
+	public static Presence find(String id) {
+		return DataStoreConnection.datastore().get(Presence.class, new ObjectId(id));
 	}
-
-	public List<String>  getChannelURLs() {
-		this.channelURLs = deserializeURLs(channelURLsBlob);
-		return channelURLs;
+	
+	public boolean isStored() {
+		return id != null;
 	}
-
-	public List<String>  getContactURLs() {
-		this.contactURLs = deserializeURLs(contactURLsBlob);
-		return contactURLs;
+	
+	public String getId() {
+		return id == null ? null : id.toStringMongod();
 	}
-
-	@Constraints.Required
-	public Date added;
-
 }

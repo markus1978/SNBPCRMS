@@ -1,8 +1,6 @@
-@(query: String, page: com.avaje.ebean.Page[Presence])
+@(query: String, page: Page[Presence])
 
-@main("presences") {
-    <h1 id="query">Query: "<span style="color: #555555" id="query">@query</span>", results in @page.getTotalRowCount() entries</h1>
-    
+@main("presences") {    
     <div id="twitter-actions" class="actions">
         <form action="@request().uri()" method="GET">        	
         	<div class="input-append" style="margin-bottom: 0px">
@@ -19,7 +17,7 @@
         </form>
     </div>
     
-    @if(page.getTotalRowCount() == 0) {  
+    @if(page.size() == 0) {  
         <div class="well">
             <em>Nothing matches the query</em>
         </div>
@@ -34,7 +32,7 @@
 	        <tbody>
 	        	@views.html.presence.page.render(query, page)            
 	        	@if(page.hasNext()){
-				<tr id="next-page" url="@routes.PresencePart.ajaxPage(query, page.getPageIndex() + 1)" isLoading="false">
+				<tr id="next-page" url="@routes.PresencePart.ajaxPage(query, page.getNextCursor())" isLoading="false">
 					<td colspan="3">
 						loading ...
 					</td>

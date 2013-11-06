@@ -9,8 +9,8 @@ GET 	/log								controllers.Application.log()
 GET 	/ratelimits							controllers.Application.ratelimits()
 
 # TwitterPart
-GET  	/twitter/users						controllers.TwitterPart.users(query ?= "")
-GET		/twitter/ajaxUsers					controllers.TwitterPart.ajaxUsers(query: String, cursor: Long)
+GET  	/twitter/list						controllers.TwitterPart.list(query ?= "")
+GET		/twitter/ajaxPage					controllers.TwitterPart.ajaxPage(query: String, cursor: Long)
 GET 	/twitter/ajaxTimeline				controllers.TwitterPart.ajaxTimeline(id: Long, maxId: Long)
 
 GET		/twitter/createPresence     		controllers.TwitterPart.createPresence(userId: Long)
@@ -32,10 +32,10 @@ POST	/action/ajaxSendTweet				controllers.TwitterPart.ajaxSendTweet()
 # PresencePart
 GET		/presence/list						controllers.PresencePart.list(query ?= "")
 GET 	/presence/ajaxPage					controllers.PresencePart.ajaxPage(query: String, cursor: Long)
-GET		/presence/ajaxEmbedded				controllers.PresencePart.ajaxEmbedded(id: Long)
-POST	/presence/ajaxUpdate/:id			controllers.PresencePart.ajaxUpdate(id: Long)
-POST	/presence/ajaxUpdateDetails/:id		controllers.PresencePart.ajaxUpdateDetails(id: Long, reloadTemplate ?= "embedded")
-GET		/presence/ajaxDetails				controllers.PresencePart.ajaxDetails(id: Long)
+GET		/presence/ajaxEmbedded				controllers.PresencePart.ajaxEmbedded(id: String)
+POST	/presence/ajaxUpdate/:id			controllers.PresencePart.ajaxUpdate(id: String)
+POST	/presence/ajaxUpdateDetails/:id		controllers.PresencePart.ajaxUpdateDetails(id: String, reloadTemplate ?= "embedded")
+GET		/presence/ajaxDetails				controllers.PresencePart.ajaxDetails(id: String)
 
 # ActionPart
 GET		/action/list						controllers.ActionPart.list(query ?= "")

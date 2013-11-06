@@ -1,32 +1,23 @@
 package models;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Indexed;
+import org.mongodb.morphia.annotations.Reference;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.utils.IndexDirection;
 
-import models.Presence.Category;
-import models.Presence.Tier;
-import play.data.validation.Constraints;
-import play.db.ebean.Model;
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
 import twitter4j.User;
+import utils.DataStoreConnection;
 
 @Entity
-public class TwitterUser extends Model {
-
-	private static final long serialVersionUID = 1L;
+public class TwitterUser {
 	
-	@Id
-	public Long id;
+	@Id public Long id;
 
-	@Constraints.Required
 	public String screenName;
-	
 	public String description;
 	public String name;
 	public String imageURL;
@@ -34,10 +25,7 @@ public class TwitterUser extends Model {
 	public int friendsCount;
 	public int tweetCount;
 	
-	@Constraints.Required
-	public Date added;
-	
-	@Constraints.Required
+	@Indexed(value=IndexDirection.DESC) public Date added;
 	public Date lastUpdated;
 	
 	public boolean isFollower;	
@@ -48,23 +36,38 @@ public class TwitterUser extends Model {
 	public int timesHasBeenFriend = 0;
 			
 	public boolean isStarred = false;
+		
+	@Reference public Presence presence; 
 	
-	@OneToOne
-	public Presence presence;
 	
-	public static Finder<Long,TwitterUser> find = new Finder<Long,TwitterUser>(Long.class, TwitterUser.class); 
+	public void save() {
+		DataStoreConnection.datastore().save(this);
+	}
+	
+	public static Page<TwitterUser> find(String whereConditions, int count, long offset) {
+		Query<TwitterUser> query = DataStoreConnection.datastore()
+			.find(TwitterUser.class);
+		if (whereConditions != null && !whereConditions.trim().equals("")) {
+			query = query.where(whereConditions);
+		}
+		query
+			.order("-added")
+			.offset((int)offset)
+			.limit(count)
+			.disableValidation()
+			.disableCursorTimeout();
+		
+		return new MongoDBPage<TwitterUser>(query);
+	}
+	
+	public static TwitterUser find(Long id) {
+		return DataStoreConnection.datastore().get(TwitterUser.class, id);
+	}
 	
 	public Presence getPresence() {
 		if (presence == null) {
-			presence = new Presence();
-			presence.category = Category.notAssigned;
-			presence.tier = Tier.notAssigned;
-			presence.name = this.screenName;
-			presence.twitterUser = this;
-			
-			List<String> url = new ArrayList<String>();
-			url.add("http://twitter.com/" + screenName);
-			presence.setChannelURLs(url);
+			presence = Presence.create(this);
+			presence.save();
 		} 
 		return presence;
 	}
@@ -73,11 +76,11 @@ public class TwitterUser extends Model {
 		return "http://twitter.com/" + twitterUser.screenName;
 	}
 	
-	public static TwitterUser update(Twitter twitter, TwitterUser existingTwitterUser, User t4jUser) throws TwitterException {
+	public static TwitterUser update(TwitterUser existingTwitterUser, TwitterMe me, User t4jUser) {
 		boolean isNew = false;
 		if (existingTwitterUser == null) {
 			isNew = true;
-			existingTwitterUser = TwitterUser.find.byId(t4jUser.getId());
+			existingTwitterUser = TwitterUser.find(t4jUser.getId());
 			if (existingTwitterUser == null) {
 				existingTwitterUser = new TwitterUser();
 				existingTwitterUser.id = t4jUser.getId();
@@ -90,7 +93,6 @@ public class TwitterUser extends Model {
 		}
 		existingTwitterUser.lastUpdated = new Date();
 
-		TwitterMe me = TwitterMe.instance(twitter);
 		boolean isFollower = me.isFollower(existingTwitterUser);
 		if (isFollower != existingTwitterUser.isFollower || isNew) {
 			existingTwitterUser.isFollower = isFollower;

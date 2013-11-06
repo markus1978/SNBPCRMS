@@ -1,5 +1,5 @@
-@(query: String, page: com.avaje.ebean.Page[Presence])
+@(query: String, page: Page[Presence])
 
-@for(presence <- page.getList()) {
+@for(presence <- page) {
 	@row(presence)                                               	                                 
 }

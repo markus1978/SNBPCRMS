@@ -1,5 +1,5 @@
-@(query: String, page: com.avaje.ebean.Page[models.Action])
+@(query: String, page: Page[models.Action])
 
-@for(action <- page.getList()) {
+@for(action <- page) {
 	@row(action, true)                                               	                                 
 }

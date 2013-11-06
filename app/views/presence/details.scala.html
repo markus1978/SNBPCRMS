@@ -21,7 +21,7 @@
 		</div>			
 	</div>
 	<div class="row-fluid">
-		<div id="presence-details-data-@presence.id" class="ajax-form-holder">			
+		<div id="presence-details-data-@presence.getId()" class="ajax-form-holder">			
 			@let(Form.form(classOf[Presence]).fill(presence)){ form =>
 				<div class="form-horizontal presence-details-column1">
 					<h5 class="section">Name and Interests</h5>
@@ -42,12 +42,12 @@
 					@for((label, fieldName, value) <- Array(("channel URLs", "channelURLs", presence.channelURLs),("contact URLs", "contactURLs", presence.contactURLs))) {
 						<div class="control-group">
 							<h5 class="section">@label</h5>				
-							<div id="@fieldName-holder-@presence.id">		
+							<div id="@fieldName-holder-@presence.getId()">		
 								@helper.repeat(form(fieldName), min = 1) { urlField =>
-									<div id="@urlField.id-holder-@presence.id" class="url-field">
+									<div id="@urlField.id-holder-@presence.getId()" class="url-field">
 					    				@helper.inputText(urlField, '_showConstraints -> false, 'emptyHelper -> true)
-					    				<a class="remove-empty-last-action" last-class="url-field" last-container-id="@fieldName-holder-@presence.id" empty-id="@urlField.id" remove-id="@urlField.id-holder-@presence.id"><p class="control-button icon-minus-sign"></p></a>						    										    			
-						    			<a @notLastRepeat(urlField, value){style="visibility:hidden;"} class="add-url-button add-url-field-action" container-id="@fieldName-holder-@presence.id" copy-id="@urlField.id-holder-@presence.id" to-hide-class="add-url-button"><p class="control-button icon-plus-sign"></p></a>							    					    		
+					    				<a class="remove-empty-last-action" last-class="url-field" last-container-id="@fieldName-holder-@presence.getId()" empty-id="@urlField.id" remove-id="@urlField.id-holder-@presence.getId()"><p class="control-button icon-minus-sign"></p></a>						    										    			
+						    			<a @notLastRepeat(urlField, value){style="visibility:hidden;"} class="add-url-button add-url-field-action" container-id="@fieldName-holder-@presence.getId()" copy-id="@urlField.id-holder-@presence.getId()" to-hide-class="add-url-button"><p class="control-button icon-plus-sign"></p></a>							    					    		
 					    				<a target="new" class="btn btn-mini open-url-action" url-input-id="@urlField.id"><p class="icon-share"></p> open</a>
 					    				<br/>
 				    				</div>

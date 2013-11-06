@@ -10,22 +10,22 @@
 		<p class="help"><span class="icon-info-sign"></span> No presence assigned for this twitter user. Calling any action will create a new one.<p/>
 	</div>
 }else{
-	<div id="presence-holder-@presence.id" class="presence-holder">
+	<div id="presence-holder-@presence.getId()" class="presence-holder">
 		<div>				
 			<div class="ajax-form-holder presence-embedded-form">
 				@let(Form.form(classOf[Presence]).fill(presence)){ form =>
-					<input type="hidden" name="id" value="@presence.id">
-					@helper.inputText(form("name"), '_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.id).absoluteURL(request())) 
-					@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.id).absoluteURL(request())) 
-					@helper.select(form("tier"), options = Seq("one"->"1", "two" -> "2", "three"->"3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.id).absoluteURL(request()))
+					<input type="hidden" name="id" value="@presence.getId()">
+					@helper.inputText(form("name"), '_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.getId()).absoluteURL(request())) 
+					@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.getId()).absoluteURL(request())) 
+					@helper.select(form("tier"), options = Seq("one"->"1", "two" -> "2", "three"->"3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.getId()).absoluteURL(request()))
 				} 
 			</div>
 			@modalButton(
-					"presence-details-model-" + presence.id, 
+					"presence-details-model-" + presence.getId(), 
 					"Presence data of " + presence.name, 
-					routes.PresencePart.ajaxDetails(presence.id).absoluteURL(request()), 
-					routes.PresencePart.ajaxUpdateDetails(presence.id).absoluteURL(request()), 
-					"presence-holder-"+presence.id) {  
+					routes.PresencePart.ajaxDetails(presence.getId()).absoluteURL(request()), 
+					routes.PresencePart.ajaxUpdateDetails(presence.getId()).absoluteURL(request()), 
+					"presence-holder-"+presence.getId()) {  
 				<span class="icon-list"></span> details</a>
 			}					
 		</div>

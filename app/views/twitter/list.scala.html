@@ -1,17 +1,8 @@
-@(query: String, users: models.TwitterUserPage)
+@(query: String, users: Page[TwitterUser])
 @import views.html.helpers._
-@main("twitter") {
-    
-    <h1 id="query">Query: "<span style="color: #555555" id="query">@query</span>", results in @users.totalSize() twitter users</h1>
-
-    @if(flash.containsKey("success")) {
-        <div class="alert-message warning">
-            <strong>Done!</strong> @flash.get("success")
-        </div>
-    } 
-    
+@main("twitter") {    
     <div id="twitter-actions" class="actions">
-        <form action="@routes.TwitterPart.users()" method="GET">        	
+        <form action="@routes.TwitterPart.list()" method="GET">        	
         	<div class="input-append" style="margin-bottom: 0px">
 	        	<input type="text" name="query" class="query" id="twitter-actions-query" value="@query">
 	        	<span class="dropdown">
@@ -55,7 +46,7 @@
             <tbody>
             	@page(query, users)        
                 @if(users.hasNext()){
-					<tr id="next-page" url="@routes.TwitterPart.ajaxUsers(query, users.getNextCursor())" isLoading="false">
+					<tr id="next-page" url="@routes.TwitterPart.ajaxPage(query, users.getNextCursor())" isLoading="false">
 						<td colspan="3">
 							loading ...
 						</td>

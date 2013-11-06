@@ -7,9 +7,9 @@
 	<div class="twitter-profile-texts">
 		<a target="new" href="@TwitterUser.getProfileURL(twitterUser)" rel="tooltip" class="with-tooltip" data-toggle="tooltip" data-placement="right" title data-original-title="@twitterUser.description">@twitterUser.name</a>&nbsp;<span style="color: #AAAAAA">@@@twitterUser.screenName</span>
 		<div class="twitter-profile-stats">			 						
-			follows: <a href="@routes.TwitterPart.users("friends: " + twitterUser.screenName)">@twitterUser.friendsCount</a>
+			follows: <a href="@routes.TwitterPart.list("friends: " + twitterUser.screenName)">@twitterUser.friendsCount</a>
 			<a class="simple-ajax-action" url='@routes.TwitterPart.importAll("friends: "+twitterUser.screenName)'><span class="icon-plus-sign"></span>,</a>			
-			followers: <a href="@routes.TwitterPart.users("followers: " + twitterUser.screenName)">@twitterUser.followersCount</a>
+			followers: <a href="@routes.TwitterPart.list("followers: " + twitterUser.screenName)">@twitterUser.followersCount</a>
 			<a class="simple-ajax-action" url='@routes.TwitterPart.importAll("followers: "+twitterUser.screenName)'><span class="icon-plus-sign"></span></a><br/>
 					
 			@if(twitterUser.isFollower) {
