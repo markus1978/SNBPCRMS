@@ -7,6 +7,7 @@ import models.Action;
 import models.Action.ActionType;
 import models.Action.Direction;
 import models.Action.Service;
+import models.EmptyPage;
 import models.Page;
 import models.Presence;
 import models.TwitterUser;
@@ -17,6 +18,7 @@ import apis.TwitterConnection;
 import apis.TwitterConnection.RateLimitPolicy;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.mongodb.MongoException;
 
 public class TwitterPart extends Controller {
 	
@@ -26,8 +28,13 @@ public class TwitterPart extends Controller {
     }
 	
     public static Result list(String query) {
-		Page<TwitterUser> result = evaluateQuery(query, -1, RateLimitPolicy.fail);    		
-		return ok(views.html.twitter.list.render(query, result));    	
+    	try {
+    		Page<TwitterUser> result = evaluateQuery(query, -1, RateLimitPolicy.fail);
+    		return ok(views.html.twitter.list.render(query, result));
+    	} catch (MongoException e) {
+    		flash("error", e.getMessage());
+    		return ok(views.html.twitter.list.render(query, EmptyPage.empty(TwitterUser.class)));
+    	}    	
     }
     
     public static Result ajaxPage(String query, long cursor) {
@@ -200,7 +207,7 @@ public class TwitterPart extends Controller {
     	
     	Presence presence = twitterUser.getPresence();
     	presence.actions.add(action);
-		presence.actions = presence.actions;
+		action.target = presence;
 		if (presence.lastActivity.getTime() < action.scheduledFor.getTime()) {
 			presence.lastActivity = action.scheduledFor;
 		}

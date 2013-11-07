@@ -31,14 +31,7 @@
 	            </tr>
 	        </thead>
 	        <tbody>
-	        	@views.html.action.page.render(query, page)            
-	        	@if(page.hasNext()){
-					<tr id="next-page" url="@routes.ActionPart.ajaxPage(query, page.getNextCursor())" isLoading="false">
-						<td colspan="3">
-							loading ...
-						</td>
-					</tr>                
-				} 	       
+	        	@views.html.action.page.render(query, page)	       
 	        </tbody>
 	    </table>
 	}                    

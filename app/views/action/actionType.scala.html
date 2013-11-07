@@ -1,7 +1,8 @@
 @(action: models.Action)
 
-@if(action.direction==models.Action.Direction.send){<span class="label"><span class="icon-arrow-right"></span></span> send}
-@if(action.direction==models.Action.Direction.receive){<span class="label"><span class="icon-arrow-left"></span></span> send}
+@if(action.direction==models.Action.Direction.send){<span class="label"><span class="icon-arrow-right"></span></span>}
+@if(action.direction==models.Action.Direction.receive){<span class="label"><span class="icon-arrow-left"></span></span>}
+@if(action.direction==models.Action.Direction.global){<span class="label"><span class="icon-globe"></span></span>}
 <span class="label">
 	@if(action.actionType==models.Action.ActionType.beFriend){<span class="icon-thumbs-up"></span>}
 	@if(action.actionType==models.Action.ActionType.unFriend){<span class="icon-thumbs-down"></span>}
@@ -9,6 +10,7 @@
 	@if(action.actionType==models.Action.ActionType.publicMessage){<span class="social-icon-twitter"></span>}
 	@if(action.actionType==models.Action.ActionType.retweet){<span class="icon-retweet"></span>}
 	@if(action.actionType==models.Action.ActionType.like){<span class="icon-star"></span>}
-</span> via <span class="label">
+</span>
+<span class="label">
 	@if(action.service==models.Action.Service.twitter){<span class="social-icon-twitter"></span>}
 </span>						

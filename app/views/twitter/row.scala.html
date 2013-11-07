@@ -11,25 +11,16 @@
 		</td>
 		<td class="twitter-profile-data">
 			<div>
-				@if(twitterUser.isFollower) { 
-					<span class="@{if (twitterUser.isFriend) "good" else "warn"}">follows</span> 
-					<span>since [@twitterUser.isFollowerSince.format("dd/mm/yy")]</span>
-				} else { 
-					<span class="@{if (twitterUser.isFriend) "bad" else "neutral"}">NOT a follower</span>
-					@if(twitterUser.timesHasBeenFollower > 0) {
-						<span>but was follower for @twitterUser.timesHasBeenFollower times</span>	
-					}
-				}
+				@aquaintence(twitterUser)
+			</div>	
+			<div>
+				@if(twitterUser.isFollower) { 			
+					<span>follows since [@twitterUser.isFollowerSince.format("dd/mm/yy")]</span>
+				} 
 			</div>
 			<div>
-				@if(twitterUser.isFriend) { 
-					<span style="@{if (twitterUser.isFollower) "good" else "bad"}">friend</span>
-					<span>since [@twitterUser.isFriendSince.format("dd/mm/yy")]</span> 
-				} else { 
-					<span style="@{if (twitterUser.isFollower) "warn" else "neutral"}">NOT a friend</span>
-					@if(twitterUser.timesHasBeenFriend > 0) {
-						<span>but was friend for @twitterUser.timesHasBeenFriend times</span>	
-					}			
+				@if(twitterUser.isFriend) { 				
+					<span>friends since [@twitterUser.isFriendSince.format("dd/mm/yy")]</span> 
 				}
 			</div>
 			<div>

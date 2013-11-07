@@ -6,22 +6,13 @@
 	</td>
 	@if(withTarget) {
 		<td class="action-target">
-			<!-- target  --> 
-			@if(action.service==models.Action.Service.twitter){					
-				@if(action.target == null || action.target.twitterUser == null) {
-					@if(action.direction==models.Action.Direction.global){
-						<div class="well">
-							<em>Global action not targeted at a distinct presence.</em>
-						</div>
-					}else{
-						<div class="well">
-							<em class="text-error">The action has no target, or the target no twitter user. This should not have happened.</em>
-						</div>
-					}	
-				}else{
-					@views.html.twitter.embeddedSmall(action.target.twitterUser)
-				}
-			}
+			@if(action.direction==models.Action.Direction.global){
+				<div class="well">
+					<em>Global action not targeted at a distinct presence.</em>
+				</div>
+			}else{
+				@views.html.presence.embeddedSmall.render(action.target)
+			} 			
 		</td>
 	}
 	<td class="action-body">

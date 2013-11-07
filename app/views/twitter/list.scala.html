@@ -15,9 +15,9 @@
 	                  
 	                  <li class="divider"></li>
 	                  <li class="nav-header">Our database:</li>
-	                  <li><a href="#" class="pre-query-btn" query="isFriend AND NOT isFollower">Friends not following</a></li>          
-	                  <li><a href="#" class="pre-query-btn" query="friendsCount>followersCount">More friends than follower</a></li>
-	                  <li><a href="#" class="pre-query-btn" query="friendsCount>followersCount AND NOT (isFriend OR isFollower) ">More friends than follower and not acquainted</a></li>                                                                            
+	                  <li><a href="#" class="pre-query-btn" query="this.isFriend && !this.isFollower">Friends not following</a></li>          
+	                  <li><a href="#" class="pre-query-btn" query="this.friendsCount>this.followersCount">More friends than follower</a></li>
+	                  <li><a href="#" class="pre-query-btn" query="this.friendsCount>this.followersCount && !(this.isFriend || this.isFollower) ">More friends than follower and not acquainted</a></li>                                                                            
 	                </ul>
 	            </span>
 	            <input type="submit" id="execute" value="Execute" class="btn">
@@ -44,14 +44,7 @@
                 </tr>
             </thead>
             <tbody>
-            	@page(query, users)        
-                @if(users.hasNext()){
-					<tr id="next-page" url="@routes.TwitterPart.ajaxPage(query, users.getNextCursor())" isLoading="false">
-						<td colspan="3">
-							loading ...
-						</td>
-					</tr>                
-				} 	        
+            	@page(query, users)               
             </tbody>
         </table>        
     }

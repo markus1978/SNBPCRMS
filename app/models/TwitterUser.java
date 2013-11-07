@@ -9,6 +9,8 @@ import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.utils.IndexDirection;
 
+import com.mongodb.MongoException;
+
 import twitter4j.User;
 import utils.DataStoreConnection;
 
@@ -48,7 +50,7 @@ public class TwitterUser {
 		Query<TwitterUser> query = DataStoreConnection.datastore()
 			.find(TwitterUser.class);
 		if (whereConditions != null && !whereConditions.trim().equals("")) {
-			query = query.where(whereConditions);
+			query = query.where("function() { return (" + whereConditions + "); }");
 		}
 		query
 			.order("-added")

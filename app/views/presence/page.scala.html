@@ -1,5 +1,12 @@
 @(query: String, page: Page[Presence])
 
 @for(presence <- page) {
-	@row(presence)                                               	                                 
+	@row(presence)  
+	@if(page.hasNext()){
+		<tr id="next-page" url="@routes.PresencePart.ajaxPage(query, page.getNextCursor())" isLoading="false">
+			<td colspan="3">
+				loading ...
+			</td>
+		</tr>               
+	}                                             	                                 
 }

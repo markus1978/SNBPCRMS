@@ -1,0 +1,15 @@
+@(twitterUser: TwitterUser)
+
+@if(twitterUser.isFollower) {
+	@if(twitterUser.isFriend) {
+		<span class="label label-good"><span class="icon-ok-sign"></span> follower and friend</span>
+	} else {
+		<span class="label label-warn"><span class="icon-exclamation-sign"></span> follower but not friend</span>
+	}								
+} else {
+	@if(twitterUser.isFriend) {
+		<span class="label label-bad"><span class="icon-exclamation-sign"></span> friend that does not follow</span>
+	} else {
+		<span class="label"><span class="icon-question-sign"></span> not aquainted</span>
+	}				 				
+}	

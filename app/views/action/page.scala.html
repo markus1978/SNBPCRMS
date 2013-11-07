@@ -1,5 +1,12 @@
 @(query: String, page: Page[models.Action])
 
 @for(action <- page) {
-	@row(action, true)                                               	                                 
+	@row(action, true)   
+    @if(page.hasNext()){
+		<tr id="next-page" url="@routes.ActionPart.ajaxPage(query, page.getNextCursor())" isLoading="false">
+			<td colspan="3">
+				loading ...
+			</td>
+		</tr>                
+	}                                             	                                 
 }

@@ -1,0 +1,22 @@
+@(presence: Presence)
+@import views.html.helpers._
+@if(presence == null){
+	<div class="well">
+		<em class="text-error">The action has no target, or the target no twitter user. This should not have happened.</em>
+	</div>
+}else{
+	@if(presence.twitterUser != null) {
+		@views.html.twitter.embeddedSmall.render(presence.twitterUser)	
+	} else {
+		@presence.name
+	}
+	@modalButton(
+			"presence-details-model-" + presence.getId(), 
+			"Presence data of " + presence.name, 
+			routes.PresencePart.ajaxDetails(presence.getId()).absoluteURL(request()), 
+			routes.PresencePart.ajaxUpdateDetails(presence.getId()).absoluteURL(request()), 
+			"presence-holder-"+presence.getId()) {  
+		<span class="icon-list"></span> details</a>
+	}
+}	
+ 
