@@ -9,8 +9,6 @@ import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.utils.IndexDirection;
 
-import com.mongodb.MongoException;
-
 import twitter4j.User;
 import utils.DataStoreConnection;
 
@@ -76,6 +74,10 @@ public class TwitterUser {
 	
 	public static String getProfileURL(TwitterUser twitterUser) {
 		return "http://twitter.com/" + twitterUser.screenName;
+	}
+	
+	public static TwitterUser get(TwitterMe twitterMe, User t4jUser) {
+		return update(null, twitterMe, t4jUser);
 	}
 	
 	public static TwitterUser update(TwitterUser existingTwitterUser, TwitterMe me, User t4jUser) {

@@ -269,7 +269,7 @@ function pullLog() {
 function pullRatelimit() {
 	if (!doNotPull) {
 		$.ajax({
-	        url: '/ratelimits',
+	        url: '/twitter/ratelimits',
 	        success:function(result, status, xhr) {
 	        	$(document).find('#ratelimits').html(result)
 	        },

@@ -6,9 +6,9 @@
 # GeneralPart
 GET     /                           		controllers.Application.index()
 GET 	/log								controllers.Application.log()
-GET 	/ratelimits							controllers.Application.ratelimits()
 
 # TwitterPart
+GET 	/twitter/ratelimits					controllers.TwitterPart.ratelimits()
 GET  	/twitter/list						controllers.TwitterPart.list(query ?= "")
 GET		/twitter/ajaxPage					controllers.TwitterPart.ajaxPage(query: String, cursor: Long)
 GET 	/twitter/ajaxTimeline				controllers.TwitterPart.ajaxTimeline(id: Long, maxId: Long)
@@ -40,6 +40,7 @@ GET		/presence/ajaxDetails				controllers.PresencePart.ajaxDetails(id: String)
 # ActionPart
 GET		/action/list						controllers.ActionPart.list(query ?= "")
 GET 	/action/ajaxPage					controllers.ActionPart.ajaxPage(query: String, cursor: Long)
+GET		/action/check						controllers.ActionPart.check(query ?= "")
 
 
 # Map static resources from the /public folder to the /assets URL path

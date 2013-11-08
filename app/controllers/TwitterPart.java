@@ -10,6 +10,7 @@ import models.Action.Service;
 import models.EmptyPage;
 import models.Page;
 import models.Presence;
+import models.TwitterMe;
 import models.TwitterUser;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -22,8 +23,27 @@ import com.mongodb.MongoException;
 
 public class TwitterPart extends Controller {
 	
+	public static TwitterConnection twitterConnection() {
+		String screenName = session("screenName");
+		if (screenName == null) {
+			// TODO login
+			screenName = "mscheidgen";
+			session("screenName", screenName);
+		}
+		TwitterConnection twitterConnection = TwitterConnection.get(TwitterMe.get(screenName));
+		return twitterConnection;
+	}
+	
+	public static Result ratelimits() {
+		return ok(views.html.twitter.ratelimit.render(twitterConnection().ratelimits()));			
+	}
+	
+	public static void check() {
+		twitterConnection().update(twitterConnection().getTwitterMe(), RateLimitPolicy.wait, false);
+	}
+	
 	public static Result ajaxTimeline(long userId, long maxId) {
-		List<twitter4j.Status> userTimelinePage = TwitterConnection.timeline(userId, maxId, RateLimitPolicy.fail);    		    
+		List<twitter4j.Status> userTimelinePage = twitterConnection().timeline(userId, maxId, RateLimitPolicy.fail);    		    
 		return ok(views.html.twitter.timelinePage.render(userId, userTimelinePage));    	
     }
 	
@@ -45,23 +65,23 @@ public class TwitterPart extends Controller {
     private static Page<TwitterUser> evaluateQuery(String query, long cursor, RateLimitPolicy rateLimitPolicy) {    	
     	if (query.startsWith("friends:")) {
 			String screenName = query.substring("friends:".length()).trim();
-			return TwitterConnection.friends(screenName, cursor, rateLimitPolicy);
+			return twitterConnection().friends(screenName, cursor, rateLimitPolicy);
 		} else if (query.startsWith("followers:")) {
 			String screenName = query.substring("followers:".length()).trim();
-			return TwitterConnection.followers(screenName, cursor, rateLimitPolicy);
+			return twitterConnection().followers(screenName, cursor, rateLimitPolicy);
 		} else if (query.startsWith("suggested:")) {
 			String categorySlug = query.substring("suggested:".length()).trim();
 			if (categorySlug.equals("")) {
 				categorySlug = null;
 			}
-			return TwitterConnection.suggestions(categorySlug, rateLimitPolicy);
+			return twitterConnection().suggestions(categorySlug, rateLimitPolicy);
 		} else {
 			return TwitterUser.find(query.trim(), 20, cursor);								
 		}
     }
     
     public static Result importAll(final String query) {
-    	TwitterConnection.startBackgroundImport(query);
+    	twitterConnection().startBackgroundImport(query);
 	    return ok("initiated import all for: '" + query + "'");
     }
     
@@ -75,7 +95,7 @@ public class TwitterPart extends Controller {
     }
     
     public static Result retweet(long userId, final long statusId) {    	    	
-		twitter4j.Status status = TwitterConnection.status(statusId, RateLimitPolicy.fail);
+		twitter4j.Status status = twitterConnection().status(statusId, RateLimitPolicy.fail);
 		final String body = status.getText();
 		return ok(views.html.twitter.row.render(createAndSaveAction(userId, ActionType.retweet, new Callback<Action>() {
 			@Override
@@ -87,7 +107,7 @@ public class TwitterPart extends Controller {
     }
     
     public static Result favor(long userId, final long statusId) {    	
-		twitter4j.Status status = TwitterConnection.status(statusId, RateLimitPolicy.fail);
+		twitter4j.Status status = twitterConnection().status(statusId, RateLimitPolicy.fail);
 		final String body = status.getText();
 		return ok(views.html.twitter.row.render(createAndSaveAction(userId, ActionType.like, new Callback<Action>() {
 			@Override

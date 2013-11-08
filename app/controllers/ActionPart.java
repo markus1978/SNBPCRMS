@@ -25,4 +25,9 @@ public class ActionPart extends Controller {
     		return internalServerError(e.getMessage());
     	}
 	}
+	
+	public static Result check(String query) {
+		TwitterPart.check();
+		return list(query);
+	}
 }

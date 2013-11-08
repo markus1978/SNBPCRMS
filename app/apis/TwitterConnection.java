@@ -1,6 +1,7 @@
 package apis;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -24,38 +25,57 @@ import twitter4j.auth.AccessToken;
 import controllers.Application;
 
 public class TwitterConnection {
-	private static final String consumerKey = "uObLVPxuBJqfrEOEB3ms1g";
-	private static final String consumerSecret = "IAYcfFI5Xhq6g0McCdPVM5EEFOqq8PUkPH7KQu58w";
-	private static final String accessToken = "127843079-7SDkbTQjdCK761FrZxd68ED6ktEMbSGn8pQTbe1h";
-	private static final String accessSecret = "H32HL32hwiA1TOFfXQ7BA5GKFHJBoGl6qJYCYuBT2Wd4z";
 	
-	private static Twitter twitter = null;
-	private static Map<String, RateLimitStatus> ratelimits = new HashMap<String, RateLimitStatus>();
+	private final TwitterMe twitterMe;
+	private final Map<String, RateLimitStatus> ratelimits = new HashMap<String, RateLimitStatus>();
+	private Twitter twitter = null;
 	
-	public static Map<String, RateLimitStatus> ratelimits() {
+	public Map<String, RateLimitStatus> ratelimits() {
 		return ratelimits;
 	}
 	
 	public enum RateLimitPolicy { wait, fail }
+		
+	private static Map<TwitterMe, TwitterConnection> connections = new HashMap<TwitterMe, TwitterConnection>();
 	
-	public static Twitter twitter() {
+	public static TwitterConnection get(TwitterMe twitterMe) {		
+		TwitterConnection twitterConnection = connections.get(twitterMe);
+		if (twitterConnection == null) {
+			twitterConnection = new TwitterConnection(twitterMe);
+			connections.put(twitterMe, twitterConnection);
+		}
+		return twitterConnection;
+	}
+	
+	private TwitterConnection(TwitterMe twitterMe) {
+		this.twitterMe = twitterMe;
+	}
+	
+	public TwitterMe getTwitterMe() {
+		return twitterMe;
+	}
+	
+	protected Twitter twitter() {
 		if (twitter == null) {
 			TwitterFactory factory = new TwitterFactory();
 			twitter = factory.getInstance();
-			twitter.setOAuthConsumer(consumerKey, consumerSecret);
-			twitter.setOAuthAccessToken(new AccessToken(accessToken, accessSecret));	
+			twitter.setOAuthConsumer(twitterMe.getConsumerKey(), twitterMe.getConsumerSecret());
+			twitter.setOAuthAccessToken(new AccessToken(twitterMe.getAccessToken(), twitterMe.getAccessSecret()));	
 		}		
 		return twitter;
 	}
 	
-	private static void waitForRatelimitForBackgroundTask(RateLimitPolicy rateLimitPolicy, String... ratelimits) {
+	public void addRatelimit(String key, RateLimitStatus rateLimitStatus) {
+		ratelimits.put(key, rateLimitStatus);
+	}
+	
+	public void waitForRatelimitForBackgroundTask(RateLimitPolicy rateLimitPolicy, String... ratelimits) {
 		if (rateLimitPolicy == RateLimitPolicy.wait) {
 			boolean approved = false;
 			while (!approved) {
 				approved = true;
 				for (String ratelimit : ratelimits) {
-					RateLimitStatus rateLimitStatus = TwitterConnection.ratelimits
-							.get(ratelimit);
+					RateLimitStatus rateLimitStatus = this.ratelimits.get(ratelimit);
 					if (rateLimitStatus != null) {
 						if (rateLimitStatus.getRemaining() <= 3) {
 							approved = false;
@@ -72,17 +92,17 @@ public class TwitterConnection {
 		}
 	}
    
-	public static List<Status> timeline(long twitterUserID, long maxStatusID, RateLimitPolicy rateLimitPolicy) {
+	public List<Status> timeline(long twitterUserID, long maxStatusID, RateLimitPolicy rateLimitPolicy) {
 		waitForRatelimitForBackgroundTask(rateLimitPolicy, "statuses/user_timeline");
 	   
 		try {
 			ResponseList<twitter4j.Status> userTimelinePage = null;
 			if (maxStatusID == -1) {
-				userTimelinePage = TwitterConnection.twitter().getUserTimeline(twitterUserID);    			
+				userTimelinePage = twitter().getUserTimeline(twitterUserID);    			
 			} else {
 				Paging paging = new Paging();
 				paging.setMaxId(maxStatusID);
-				userTimelinePage = TwitterConnection.twitter().getUserTimeline(paging);    			
+				userTimelinePage = twitter().getUserTimeline(paging);    			
 			}
 			ratelimits.put("statuses/user_timeline", userTimelinePage.getRateLimitStatus());
 			return userTimelinePage;
@@ -91,7 +111,7 @@ public class TwitterConnection {
 		}
 	}
 	
-	public static Status status(long statusID, RateLimitPolicy rateLimitPolicy) {
+	public Status status(long statusID, RateLimitPolicy rateLimitPolicy) {
 		waitForRatelimitForBackgroundTask(rateLimitPolicy, "statuses/show");
 		try {
 			Status status = twitter().showStatus(statusID);
@@ -102,30 +122,30 @@ public class TwitterConnection {
 		}
 	}
 	
-	public static Page<TwitterUser> friends(String screenName, long cursor, RateLimitPolicy rateLimitPolicy) {
+	public Page<TwitterUser> friends(String screenName, long cursor, RateLimitPolicy rateLimitPolicy) {
     	waitForRatelimitForBackgroundTask(rateLimitPolicy, "friends/list");
     	
     	try {
 			PagableResponseList<User> twitterResponse = twitter().getFriendsList(screenName, cursor);
 			ratelimits.put("friends/list", twitterResponse.getRateLimitStatus());
-			return TwitterPage.create(twitterResponse, TwitterMe.instance());
+			return TwitterPage.create(twitterResponse, twitterMe);
     	} catch (TwitterException e) {
     		throw new RuntimeException(e);
     	}
 	}
 
-	public static Page<TwitterUser> followers(String screenName, long cursor, RateLimitPolicy rateLimitPolicy) {
+	public Page<TwitterUser> followers(String screenName, long cursor, RateLimitPolicy rateLimitPolicy) {
 		waitForRatelimitForBackgroundTask(rateLimitPolicy, "followers/list");
 		try {			
 			PagableResponseList<User> twitterResponse = twitter().getFollowersList(screenName, cursor);
 			ratelimits.put("followers/list", twitterResponse.getRateLimitStatus());
-			return TwitterPage.create(twitterResponse, TwitterMe.instance());
+			return TwitterPage.create(twitterResponse, twitterMe);
 		} catch (TwitterException e) {
 			throw new RuntimeException(e);
 		}
     }
 	
-    public static Page<TwitterUser> suggestions(String categorySlug, RateLimitPolicy rateLimitPolicy) {
+    public Page<TwitterUser> suggestions(String categorySlug, RateLimitPolicy rateLimitPolicy) {
     	waitForRatelimitForBackgroundTask(rateLimitPolicy, "users/suggestions/:slug");
     	try {	
 			if (categorySlug == null) {
@@ -139,13 +159,13 @@ public class TwitterConnection {
 	    	}
 	    	ResponseList<twitter4j.User> response = twitter().getUserSuggestions(categorySlug);
 	    	ratelimits.put("users/suggestions/:slug", response.getRateLimitStatus());
-			return TwitterPage.create(response, TwitterMe.instance());
+			return TwitterPage.create(response, twitterMe);
 		} catch (TwitterException e) {
 			throw new RuntimeException(e);
 		}
     }
     
-    public static void startBackgroundImport(final String query) {
+    public void startBackgroundImport(final String query) {
     	Akka.system().scheduler().scheduleOnce(
     			Duration.Zero(),
     	        new Runnable() {
@@ -179,7 +199,7 @@ public class TwitterConnection {
 	    	            				ResponseList<User> users = twitter().lookupUsers(ids);
 	    	            				ratelimits.put("users/lookup", users.getRateLimitStatus());
 	    	            				for (User t4jUser: users) {
-	    	            					TwitterUser.update(null, TwitterMe.instance(), t4jUser);
+	    	            					TwitterUser.update(null, twitterMe, t4jUser);
 	    	            				}
 	    	            				totalUsersImported += ids.length;
 	    	            				Application.log.add("Imported " + totalUsersImported + " users.");
@@ -212,7 +232,7 @@ public class TwitterConnection {
     	);
     }
     
-    public static void update(List<TwitterUser> twitterUsers, RateLimitPolicy rateLimitPolicy) {
+    public void update(List<TwitterUser> twitterUsers, RateLimitPolicy rateLimitPolicy) {
     	if (twitterUsers.size() > 100) {
     		throw new IllegalArgumentException("Too many users for one update.");
     	}
@@ -228,27 +248,34 @@ public class TwitterConnection {
 			ratelimits.put("users/lookup", users.getRateLimitStatus());
 			i = 0;
 			for (User t4jUser: users) {
-				TwitterUser.update(twitterUsers.get(i++), TwitterMe.instance(), t4jUser);
+				TwitterUser.update(twitterUsers.get(i++), twitterMe, t4jUser);
 			}
     	} catch (TwitterException e) {
     		throw new RuntimeException(e);
     	}
     }
     
-	public static void update(TwitterMe instance, RateLimitPolicy rateLimitPolicy) {
+	public void update(TwitterMe instance, RateLimitPolicy rateLimitPolicy, boolean isNew) {
+		TwitterActionFactory twitterActionFactory = new TwitterActionFactory(this);
 		try {
 			waitForRatelimitForBackgroundTask(rateLimitPolicy, "users/show");
-			User t4jUserMe = twitter.showUser(instance.screenName);
+			User t4jUserMe = twitter().showUser(instance.screenName);
 			ratelimits.put("users/show", t4jUserMe.getRateLimitStatus());
-						
+			
+			HashSet<Long> oldFriends = new HashSet<>(instance.friends);
+			HashSet<Long> oldFollower = new HashSet<>(instance.followers);
+			
 			boolean first = true;
 			IDs ids = null;
 			while (first || ids.hasNext()) {			
 				waitForRatelimitForBackgroundTask(rateLimitPolicy, "friends/ids");
-				ids = twitter.getFriendsIDs(t4jUserMe.getId(), first ? -1 : ids.getNextCursor());
+				ids = twitter().getFriendsIDs(t4jUserMe.getId(), first ? -1 : ids.getNextCursor());
 				ratelimits.put("friends/ids", ids.getRateLimitStatus());
 				for (long id: ids.getIDs()) {
-					instance.updateFriend(id); // TODO create action for new friend
+					instance.updateFriend(id);
+					if (!oldFriends.remove(id) && !isNew) {
+						twitterActionFactory.sendFollow(id);
+					}
 				}
 				first = false;
 			}
@@ -256,21 +283,36 @@ public class TwitterConnection {
 			first = true;
 			while (first || ids.hasNext()) {			
 				waitForRatelimitForBackgroundTask(rateLimitPolicy, "followers/ids");
-				ids = twitter.getFollowersIDs(t4jUserMe.getId(), first ? -1 : ids.getNextCursor());
+				ids = twitter().getFollowersIDs(t4jUserMe.getId(), first ? -1 : ids.getNextCursor());
 				ratelimits.put("followers/ids", ids.getRateLimitStatus());
 				for (long id: ids.getIDs()) {
-					instance.updateFollower(id); // TODO create action for new follower
+					instance.updateFollower(id);
+					if (!oldFollower.remove(id) && !isNew) {
+						twitterActionFactory.receiveFollow(id);
+					}
 				}
 				first = false;
 			}
 			
-			// TODO keep track of deleted friends and followers													
+			// actions for removed friends and followers
+			if (!isNew) {
+				for(Long friend: oldFriends) {
+					twitterActionFactory.sendUnFollow(friend);
+				}
+				for(Long follower: oldFollower) {
+					twitterActionFactory.receiveUnFollow(follower);
+				}
+			}
+																
 			// TODO look for new mentions
 			// TODO look for new retweets
 			// TODO look for new directmessages
 			// TODO look for new favorits
+			
 		} catch (TwitterException e) {
 			throw new RuntimeException(e);
-		}		
+		} finally {
+			instance.save();
+		}
 	}
 }
