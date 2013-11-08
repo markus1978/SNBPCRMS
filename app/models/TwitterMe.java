@@ -24,9 +24,9 @@ public class TwitterMe {
 	private String accessSecret;
 	
 	public Long id;
-	public Long latestRetweet = null;
-	public Long latestMention = null;
-	public Long lastestDirectMessage = null;
+	public long latestRetweet = 0;
+	public long latestMention = 0;
+	public long lastestDirectMessage = 0;
 
 	public List<Long> friends = new ArrayList<Long>();
 	public List<Long> followers = new ArrayList<Long>();
@@ -110,8 +110,8 @@ public class TwitterMe {
 					"mscheidgen",
 					"uObLVPxuBJqfrEOEB3ms1g",
 					"IAYcfFI5Xhq6g0McCdPVM5EEFOqq8PUkPH7KQu58w",
-					"127843079-7SDkbTQjdCK761FrZxd68ED6ktEMbSGn8pQTbe1h",
-					"H32HL32hwiA1TOFfXQ7BA5GKFHJBoGl6qJYCYuBT2Wd4z");				
+					"127843079-lSfAi1HpoYXCFqsp4rXYq16DwlzHOeCjP7dd5nrv",
+					"U3wjEMIVCPiKvalWL7oEMFNEfwocNGPrmeUc6HtG80zTk");				
 			}
 			
 			instance.friendsSet.addAll(instance.friends);

@@ -1,5 +1,6 @@
 package apis;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,6 +12,7 @@ import models.TwitterPage;
 import models.TwitterUser;
 import play.libs.Akka;
 import scala.concurrent.duration.Duration;
+import twitter4j.DirectMessage;
 import twitter4j.IDs;
 import twitter4j.PagableResponseList;
 import twitter4j.Paging;
@@ -34,7 +36,7 @@ public class TwitterConnection {
 		return ratelimits;
 	}
 	
-	public enum RateLimitPolicy { wait, fail }
+	public enum RateLimitPolicy { wait, fail, skip }
 		
 	private static Map<TwitterMe, TwitterConnection> connections = new HashMap<TwitterMe, TwitterConnection>();
 	
@@ -69,8 +71,8 @@ public class TwitterConnection {
 		ratelimits.put(key, rateLimitStatus);
 	}
 	
-	public void waitForRatelimitForBackgroundTask(RateLimitPolicy rateLimitPolicy, String... ratelimits) {
-		if (rateLimitPolicy == RateLimitPolicy.wait) {
+	public boolean waitForRatelimitForBackgroundTask(RateLimitPolicy rateLimitPolicy, String... ratelimits) {
+		if (rateLimitPolicy == RateLimitPolicy.wait || rateLimitPolicy == RateLimitPolicy.skip) {
 			boolean approved = false;
 			while (!approved) {
 				approved = true;
@@ -80,8 +82,10 @@ public class TwitterConnection {
 						if (rateLimitStatus.getRemaining() <= 3) {
 							approved = false;
 							try {
-								Thread.sleep(rateLimitStatus
-										.getSecondsUntilReset() * 1000);
+								if (rateLimitPolicy == RateLimitPolicy.skip) {
+									return false;
+								}
+								Thread.sleep(rateLimitStatus.getSecondsUntilReset() * 1000);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
@@ -90,6 +94,7 @@ public class TwitterConnection {
 				}
 			}
 		}
+		return true;
 	}
    
 	public List<Status> timeline(long twitterUserID, long maxStatusID, RateLimitPolicy rateLimitPolicy) {
@@ -256,7 +261,7 @@ public class TwitterConnection {
     }
     
 	public void update(TwitterMe instance, RateLimitPolicy rateLimitPolicy, boolean isNew) {
-		TwitterActionFactory twitterActionFactory = new TwitterActionFactory(this);
+		final TwitterActionFactory twitterActionFactory = new TwitterActionFactory(this);
 		try {
 			waitForRatelimitForBackgroundTask(rateLimitPolicy, "users/show");
 			User t4jUserMe = twitter().showUser(instance.screenName);
@@ -294,25 +299,126 @@ public class TwitterConnection {
 				first = false;
 			}
 			
-			// actions for removed friends and followers
 			if (!isNew) {
+				// actions for removed friends and followers
 				for(Long friend: oldFriends) {
 					twitterActionFactory.sendUnFollow(friend);
 				}
 				for(Long follower: oldFollower) {
 					twitterActionFactory.receiveUnFollow(follower);
 				}
-			}
-																
-			// TODO look for new mentions
-			// TODO look for new retweets
-			// TODO look for new directmessages
-			// TODO look for new favorits
 			
+				// actions for mentions
+				instance.latestMention = pullItems(new PullItemHandler<Status>() {
+					public ResponseList<Status> receiveItems(Paging paging) throws TwitterException {
+						return twitter().getMentionsTimeline(paging);
+					}
+
+					@Override
+					public long getId(Status item) {
+						return item.getId();
+					}
+
+					@Override
+					public void createAction(Status item) {
+						twitterActionFactory.receiveMention(item);
+					}	
+				}, instance.latestMention, rateLimitPolicy, "statuses/mention_timeline");
+				
+				// look for new retweets
+				instance.latestRetweet = pullItems(new PullItemHandler<Status>() {
+					public ResponseList<Status> receiveItems(Paging paging) throws TwitterException {
+						return twitter().getRetweetsOfMe(paging);
+					}										
+
+					@Override
+					public List<Status> postProcessItems(List<Status> items)
+							throws TwitterException {					
+						List<Status> retweets = new ArrayList<Status>();
+						for (Status tweet: items) {
+							retweets.addAll(twitter().getRetweets(tweet.getId()));
+						}
+						return retweets;
+					}
+
+					@Override
+					public long getId(Status item) {
+						return item.getRetweetedStatus().getId();
+					}
+
+					@Override
+					public void createAction(Status item) {
+						twitterActionFactory.receiveRetweet(item);
+					}	
+				}, instance.latestRetweet, rateLimitPolicy, "statuses/retweets_of_me");				
+				
+				// look for new favorits			
+				// TODO only possible via streaming API -> required continuous supervision
+				
+				
+				// look for new directmessages
+				instance.lastestDirectMessage = pullItems(new PullItemHandler<DirectMessage>() {
+					public ResponseList<DirectMessage> receiveItems(Paging paging) throws TwitterException {
+						return twitter().getDirectMessages(paging);
+					}
+
+					@Override
+					public long getId(DirectMessage item) {
+						return item.getId();
+					}
+
+					@Override
+					public void createAction(DirectMessage item) {
+						twitterActionFactory.receiveDirectMessage(item);
+					}	
+				}, instance.lastestDirectMessage, rateLimitPolicy, "direct_messages");										
+			}			
 		} catch (TwitterException e) {
+			addRatelimit("*", e.getRateLimitStatus());
 			throw new RuntimeException(e);
 		} finally {
 			instance.save();
 		}
+	}
+	
+	private <E> long pullItems(PullItemHandler<E> handler, long mostRecentKnownItemID, RateLimitPolicy policy, String ratelimit) throws TwitterException {		
+		long oldestReceivedItemID = -1;
+		if (mostRecentKnownItemID <= 0) {
+			mostRecentKnownItemID = 1;
+		}
+		long newMostRecentKnownItemID = mostRecentKnownItemID;
+		while (waitForRatelimitForBackgroundTask(policy, ratelimit)) {
+			Paging paging = null;
+			if (oldestReceivedItemID == -1) {
+				paging = new Paging(1, 100, mostRecentKnownItemID);
+			} else {
+				paging = new Paging(1, 100, mostRecentKnownItemID, oldestReceivedItemID - 1);
+			}
+			ResponseList<E> receivedItems = handler.receiveItems(paging);
+			addRatelimit(ratelimit, receivedItems.getRateLimitStatus());
+			if (receivedItems.isEmpty()) {
+				return newMostRecentKnownItemID;
+			}
+			for(E item: handler.postProcessItems(receivedItems)) {
+				handler.createAction(item);
+				long id = handler.getId(item);
+				if (oldestReceivedItemID == -1 || id < oldestReceivedItemID) {
+					oldestReceivedItemID = id;
+				}
+				if (id > newMostRecentKnownItemID) {
+					newMostRecentKnownItemID = id;
+				}
+			}
+		}
+		return newMostRecentKnownItemID;
+	}
+	
+	private abstract class PullItemHandler<E> {
+		public abstract ResponseList<E> receiveItems(Paging paging) throws TwitterException;
+		public List<E> postProcessItems(List<E> items) throws TwitterException {
+			return items;
+		}
+		public abstract long getId(E item);
+		public abstract void createAction(E item);
 	}
 }

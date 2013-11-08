@@ -1,4 +1,5 @@
 @(presence: models.Presence)
+@import utils.Let._
 <tr class="presence-holder">
 	<td>
 		<b>@presence.name</b><!-- 
@@ -14,6 +15,12 @@
 			-->)
 		}
 		@if(presence.contactURLs.size()>0){@presence.contactURLs.size() contacts}
+		@let(presence.actions.filter(a=>{!a.isRead})){unReadActions=>
+			@if(!unReadActions.isEmpty()){
+				<span class="label label-warn"><b>@unReadActions.size()</b> unseen actions</span>	
+			}
+		}
+
 	</td>
 	<td>
 		<a href="#presence-modal@presence.getId()" role="button" class="btn btn-mini load-modal-data-ajax-action" url="@routes.PresencePart.ajaxDetails(presence.getId())" data-toggle="modal"><span class="icon-list"></span> details</a> 

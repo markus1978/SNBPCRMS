@@ -2,7 +2,10 @@
 <tr class="action-holder">
 	<td class="action-type">
 		@actionType(action)<br/>
-		<span class="unimportant">[@action.scheduledFor.format("HH:mm dd/mm/yy")]</span>												
+		<span class="unimportant">[@action.scheduledFor.format("HH:mm dd/mm/yy")]</span><br>
+		@if(!action.isRead) {
+			<span class="label label-warn"><span class="icon-exclamation-sign"></span> unseen</span></span>		
+		}												
 	</td>
 	@if(withTarget) {
 		<td class="action-target">

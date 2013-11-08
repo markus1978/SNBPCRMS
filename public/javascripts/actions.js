@@ -240,6 +240,7 @@ $(document).ready(function($) {
 		}
 		window.open(url,'new')
 	})
+	enableTooltips(document)
 })
 
 function enableTooltips(container) {

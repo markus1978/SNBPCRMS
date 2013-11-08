@@ -9,7 +9,12 @@ public class ActionPart extends Controller {
 	public static Result list(String query) {    	    	
     	Page<Action> page = null;
     	try {
-	    	page = Action.find(20, 0);	    				
+	    	page = Action.find(query, 20, 0);	
+			for (Action action: page) {
+				if (!action.isRead) {
+					action.markRead();
+				}
+			}
 	    	return ok(views.html.action.list.render(query, page));
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());
@@ -19,7 +24,12 @@ public class ActionPart extends Controller {
 	public static Result ajaxPage(String query, long cursor) {
 		Page<Action> page = null;
     	try {
-	    	page = Action.find(20, cursor);		
+	    	page = Action.find(query, 20, cursor);
+	    	for (Action action: page) {
+				if (!action.isRead) {
+					action.markRead();
+				}
+			}
 	    	return ok(views.html.action.page.render(query, page));
     	} catch (Exception e) {
     		return internalServerError(e.getMessage());

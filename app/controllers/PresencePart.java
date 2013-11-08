@@ -9,12 +9,12 @@ import utils.JsonUpdateMapper;
 public class PresencePart extends Controller {
 	
 	public static Result list(String query) {    	    	    	
-    	Page<Presence> page = Presence.find(20, 0);			
+    	Page<Presence> page = Presence.find(query, 20, 0);			
     	return ok(views.html.presence.list.render(query, page));
 	}
 	
 	public static Result ajaxPage(String query, long cursor) {		    	
-		Page<Presence> page = Presence.find(20, (int)cursor);	    				
+		Page<Presence> page = Presence.find(query, 20, (int)cursor);	    				
     	return ok(views.html.presence.page.render(query, page));    	
 	}
 	

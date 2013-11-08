@@ -10,20 +10,7 @@
 			@views.html.twitter.embedded(twitterUser, true)
 		</td>
 		<td class="twitter-profile-data">
-			<div>
-				@aquaintence(twitterUser)
-			</div>	
-			<div>
-				@if(twitterUser.isFollower) { 			
-					<span>follows since [@twitterUser.isFollowerSince.format("dd/MM/yy")]</span>
-				} 
-			</div>
-			<div>
-				@if(twitterUser.isFriend) { 				
-					<span>friends since [@twitterUser.isFriendSince.format("dd/MM/yy")]</span> 
-				}
-			</div>
-			<div>
+			<div class="twitter-profile-data-buttons">
 				<a class="btn btn-mini reload-ajax-action" holder-id="twitter-holder-@twitterUser.id" url="@routes.TwitterPart.star(twitterUser.id,!twitterUser.isStarred)">
 					@if(twitterUser.isStarred){
 						<span class="icon-star"></span> unstar
@@ -41,6 +28,19 @@
 					</a>
 				}
 			</div>
+			<div>
+				@aquaintence(twitterUser)
+			</div>	
+			<div>
+				@if(twitterUser.isFollower) { 			
+					<span>follows since [@twitterUser.isFollowerSince.format("dd/MM/yy")]</span>
+				} 
+			</div>
+			<div>
+				@if(twitterUser.isFriend) { 				
+					<span>friends since [@twitterUser.isFriendSince.format("dd/MM/yy")]</span> 
+				}
+			</div>			
 		</td>
 		<td class="presence-data">
 			@views.html.presence.embedded.render(twitterUser.presence, routes.TwitterPart.createPresence(twitterUser.id).absoluteURL(request()))					

@@ -5,15 +5,24 @@
 		keyList.addAll(rateLimitData.keySet());
 		"";
 	}
-	@for(key<-keyList.sorted){
-		@let(rateLimitData.get(key)){rateLimitStatus=>
-			@if(rateLimitStatus.getLimit()!=rateLimitStatus.getRemaining()&&((rateLimitStatus.getRemaining()/rateLimitStatus.getLimit().toFloat<.3)||(rateLimitStatus.getRemaining()<=3))) {
-				<li class="twitter-rate-limit">
-					@if(rateLimitStatus.getResetTimeInSeconds().toLong*1000>System.currentTimeMillis()) {
-						<span class="twitter-rate-limit-name">@key</span>:@rateLimitStatus.getRemaining()/@rateLimitStatus.getLimit() for @(new Date(rateLimitStatus.getResetTimeInSeconds().toLong*1000-System.currentTimeMillis()).format("mm:ss"))
+	@let(keyList.filter((key)=>{
+			val rateLimitStatus = rateLimitData.get(key); 
+			val limitReached = rateLimitStatus.getLimit()!=rateLimitStatus.getRemaining() &&
+				((rateLimitStatus.getRemaining()/rateLimitStatus.getLimit().toFloat<.3) ||
+					(rateLimitStatus.getRemaining()<=3));
+			limitReached && rateLimitStatus.getResetTimeInSeconds().toLong*1000>System.currentTimeMillis()
+	}).sorted){finalList=>
+		@if(!finalList.isEmpty()) {
+			<div class="well">
+				@for(key <- finalList) {
+					@let(rateLimitData.get(key)){rateLimitStatus=>					
+						<p class="text-error">@key:
+							@rateLimitStatus.getRemaining()/@rateLimitStatus.getLimit() for 
+							@(new Date(rateLimitStatus.getResetTimeInSeconds().toLong*1000-System.currentTimeMillis()).format("mm:ss"))
+						</p>
 					}
-				</li>
-			}
+				}
+			</div>
 		}
 	}
 }

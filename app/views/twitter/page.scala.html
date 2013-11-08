@@ -1,12 +1,12 @@
 @(query: String, users: models.Page[models.TwitterUser])
 
 @for(userModel <- users) {
-	@row(userModel)    
-    @if(users.hasNext()){
-		<tr id="next-page" url="@routes.TwitterPart.ajaxPage(query, users.getNextCursor())" isLoading="false">
-			<td colspan="3">
-				loading ...
-			</td>
-		</tr>                
-	} 	                                            	                                 
+	@row(userModel)                                                	                                 
 }
+@if(users.hasNext()){
+	<tr id="next-page" url="@routes.TwitterPart.ajaxPage(query, users.getNextCursor())" isLoading="false">
+		<td colspan="3">
+			loading ...
+		</td>
+	</tr>                
+} 	

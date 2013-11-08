@@ -39,7 +39,7 @@ public class TwitterPart extends Controller {
 	}
 	
 	public static void check() {
-		twitterConnection().update(twitterConnection().getTwitterMe(), RateLimitPolicy.wait, false);
+		twitterConnection().update(twitterConnection().getTwitterMe(), RateLimitPolicy.skip, false);
 	}
 	
 	public static Result ajaxTimeline(long userId, long maxId) {

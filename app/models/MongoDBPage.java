@@ -17,7 +17,7 @@ public class MongoDBPage<E> implements Page<E> {
 	}
 	
 	public boolean hasNext() {
-		return query.getBatchSize() == query.getLimit();
+		return data.size() == query.getLimit();
 	}
 	
 	public boolean hasPrev() {
@@ -25,7 +25,7 @@ public class MongoDBPage<E> implements Page<E> {
 	}
 	
 	public long getNextCursor() {
-		return query.getOffset() + query.getBatchSize();
+		return query.getOffset() + data.size();
 	}
 	
 	public long getPrevCursor() {

@@ -61,7 +61,7 @@ public class TwitterTryout {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		UseToken();
+		AuthenticateToken();
 		System.exit(0);
 	}
 

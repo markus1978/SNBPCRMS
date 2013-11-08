@@ -8,6 +8,7 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.utils.IndexDirection;
 
 import utils.DataStoreConnection;
@@ -29,6 +30,7 @@ public class Action {
 	public Date executedAt = null;	
 	public boolean isExecuted = false;		
 	@Reference public Presence target = null;
+	public boolean isRead = true;
 	
 	public static Action create(ActionType actionType, Service service, Direction direction) {
 		Action action = new Action();
@@ -54,15 +56,23 @@ public class Action {
 		);
 	}
 	
-	public static Page<Action> find(int count, long offset) {
+	public static Page<Action> find(String whereConditions, int count, long offset) {
 		Query<Action> query = DataStoreConnection.datastore()
-				.find(Action.class)
+				.find(Action.class);
+		if (whereConditions != null && !whereConditions.trim().equals("")) {
+			query = query.where("function() { return (" + whereConditions + "); }");
+		}
+		query
 				.order("-scheduledFor")
 				.offset((int)offset)
 				.limit(count)
 				.disableCursorTimeout();
 		
 		return new MongoDBPage<Action>(query);
+	}
+	
+	public static Action find(String id) {
+		return DataStoreConnection.datastore().get(Action.class, new ObjectId(id));
 	}
 	
 	public boolean isStored() {
@@ -73,20 +83,8 @@ public class Action {
 		return id == null ? null : id.toStringMongod();
 	}
 
-		// old code
-//	public static Finder<Long,Action> find = new Finder<Long,Action>(Long.class, Action.class);
-//	
-//	public static String abr(ActionType type) {
-//		if (type == ActionType.beFriend) {
-//			return "o";
-//		} else if (type == ActionType.unFriend) {
-//			return "x";
-//		} else if (type == ActionType.message) {
-//			return "m";
-//		} else if (type == ActionType.retweet) {
-//			return "R";
-//		} else {
-//			return "ERROR";
-//		}
-//	}
+	public void markRead() {
+		UpdateOperations<Action> setRead = DataStoreConnection.datastore().createUpdateOperations(Action.class).set("isRead", true);
+		DataStoreConnection.datastore().update(this, setRead);
+	}
 }

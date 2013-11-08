@@ -57,9 +57,13 @@ public class Presence {
 		DataStoreConnection.datastore().save(this);
 	}
 	
-	public static Page<Presence> find(int count, int offset) {
+	public static Page<Presence> find(String whereConditions, int count, int offset) {
 		Query<Presence> query = DataStoreConnection.datastore()
-				.find(Presence.class)
+				.find(Presence.class);
+		if (whereConditions != null && !whereConditions.trim().equals("")) {
+			query = query.where("function() { return (" + whereConditions + "); }");
+		}
+		query
 				.order("-lastActivity")
 				.offset(offset)
 				.limit(count)
