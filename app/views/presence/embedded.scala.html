@@ -3,23 +3,17 @@
 @import utils.Let._
 @import play.data.Form
 
-@if(presence == null){			
-	<div class="presence-holder">
-		<a class="btn btn-mini reload-ajax-action" holder-class="presence-holder" url="@createURL"><span class="icon-file"></span> create</a>
-		<a class="btn btn-mini"><span class="icon-search"></span> assign</a>
-		<p class="help"><span class="icon-info-sign"></span> No presence assigned for this twitter user. Calling any action will create a new one.<p/>
-	</div>
+@if(presence == null){	
+	@if(createURL != null){		
+		<div class="presence-holder">
+			<a class="btn btn-mini reload-ajax-action" holder-class="presence-holder" url="@createURL"><span class="icon-file"></span> create</a>
+			<a class="btn btn-mini"><span class="icon-search"></span> assign</a>
+			<p class="help"><span class="icon-info-sign"></span> No presence assigned for this twitter user. Calling any action will create a new one.<p/>
+		</div>
+	}
 }else{
-	<div id="presence-holder-@presence.getId()" class="presence-holder">
-		<div>				
-			<div class="ajax-form-holder presence-embedded-form">
-				@let(Form.form(classOf[Presence]).fill(presence)){ form =>
-					<input type="hidden" name="id" value="@presence.getId()">
-					@helper.inputText(form("name"), '_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.getId()).absoluteURL(request())) 
-					@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.getId()).absoluteURL(request())) 
-					@helper.select(form("tier"), options = Seq("one"->"1", "two" -> "2", "three"->"3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.getId()).absoluteURL(request()))
-				} 
-			</div>
+	<div id="presence-holder-@presence.getId()">
+		<div class="snrms-row-buttons">
 			@modalButton(
 					"presence-details-model-" + presence.getId(), 
 					"Presence data of " + presence.name, 
@@ -27,16 +21,31 @@
 					routes.PresencePart.ajaxUpdateDetails(presence.getId()).absoluteURL(request()), 
 					"presence-holder-"+presence.getId()) {  
 				<span class="icon-list"></span> details</a>
-			}					
+			}
+			<a class="btn btn-mini reload-ajax-action" url="@routes.PresencePart.ajaxDelete(presence.getId())" holder-id="presence-holder-@presence.getId()">
+				<span class="icon-trash"></span> delete</a>
+			</a>		
 		</div>
-		<div>	
-			Actions: @if(presence.actions.size()>0){@presence.actions.size()}else{none}<br/>			
-			@for(action <- presence.actions.reverse.splitAt(5)._1){
-				@views.html.action.actionType.render(action)<br/>				
-			}
-			@if(presence.actions.size()>5) {
-				<span>...</span>	
-			}
+		<div class="presence-holder">
+			<div>				
+				<div class="ajax-form-holder presence-embedded-form">
+					@let(Form.form(classOf[Presence]).fill(presence)){ form =>
+						<input type="hidden" name="id" value="@presence.getId()">
+						@helper.inputText(form("name"), '_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.getId()).absoluteURL(request())) 
+						@helper.select(form("category"), options = Seq("publication"->"Publication", "developer" -> "Developer", "user"->"User", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.getId()).absoluteURL(request())) 
+						@helper.select(form("tier"), options = Seq("one"->"1", "two" -> "2", "three"->"3", "notAssigned"->"not assigned"),'_showConstraints -> false, 'class -> "ajax-form", 'url -> routes.PresencePart.ajaxUpdate(presence.getId()).absoluteURL(request()))
+					} 
+				</div>			
+			</div>
+			<div>	
+				Actions: @if(presence.actions.size()>0){@presence.actions.size()}else{none}<br/>			
+				@for(action <- presence.actions.reverse.splitAt(5)._1){
+					@views.html.action.actionType.render(action)<br/>				
+				}
+				@if(presence.actions.size()>5) {
+					<span>...</span>	
+				}
+			</div>
 		</div>
 	</div>		
 }	

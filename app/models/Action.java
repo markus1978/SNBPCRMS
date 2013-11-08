@@ -87,4 +87,8 @@ public class Action {
 		UpdateOperations<Action> setRead = DataStoreConnection.datastore().createUpdateOperations(Action.class).set("isRead", true);
 		DataStoreConnection.datastore().update(this, setRead);
 	}
+
+	public void delete() {
+		DataStoreConnection.datastore().delete(this);
+	}
 }

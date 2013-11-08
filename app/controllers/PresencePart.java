@@ -46,4 +46,9 @@ public class PresencePart extends Controller {
 	public static Result ajaxEmbedded(String id) {
 		return ok(views.html.presence.embedded.render(Presence.find(id), null));		
 	}
+	
+	public static Result ajaxDelete(String id) {
+		Presence.find(id).delete();
+		return ok(views.html.presence.embedded.render(null, null));
+	}
 }

@@ -10,7 +10,7 @@
 			@views.html.twitter.embedded(twitterUser, true)
 		</td>
 		<td class="twitter-profile-data">
-			<div class="twitter-profile-data-buttons">
+			<div class="snrms-row-buttons">
 				<a class="btn btn-mini reload-ajax-action" holder-id="twitter-holder-@twitterUser.id" url="@routes.TwitterPart.star(twitterUser.id,!twitterUser.isStarred)">
 					@if(twitterUser.isStarred){
 						<span class="icon-star"></span> unstar

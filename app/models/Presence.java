@@ -76,6 +76,18 @@ public class Presence {
 		return DataStoreConnection.datastore().get(Presence.class, new ObjectId(id));
 	}
 	
+	public void delete() {
+		for(Action action: actions) {
+			action.delete();
+		}
+		TwitterUser twitterUser = this.twitterUser;
+		if (twitterUser != null) {
+			twitterUser.presence = null;
+			twitterUser.save();
+		}
+		DataStoreConnection.datastore().delete(this);
+	}
+	
 	public boolean isStored() {
 		return id != null;
 	}

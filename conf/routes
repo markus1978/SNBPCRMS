@@ -36,6 +36,7 @@ GET		/presence/ajaxEmbedded				controllers.PresencePart.ajaxEmbedded(id: String)
 POST	/presence/ajaxUpdate/:id			controllers.PresencePart.ajaxUpdate(id: String)
 POST	/presence/ajaxUpdateDetails/:id		controllers.PresencePart.ajaxUpdateDetails(id: String, reloadTemplate ?= "embedded")
 GET		/presence/ajaxDetails				controllers.PresencePart.ajaxDetails(id: String)
+GET		/presence/ajaxDelete				controllers.PresencePart.ajaxDelete(id: String)
 
 # ActionPart
 GET		/action/list						controllers.ActionPart.list(query ?= "")
