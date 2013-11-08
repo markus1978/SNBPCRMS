@@ -26,7 +26,7 @@
 	<a class="simple-ajax-action" url='@routes.TwitterPart.importAll("friends: "+twitterUser.screenName)'><span class="icon-plus-sign"></span>,</a>			
 	followers: @if(withActions){<a href="@routes.TwitterPart.list("followers: " + twitterUser.screenName)">}@twitterUser.followersCount@if(withActions){</a>}
 	<a class="simple-ajax-action" url='@routes.TwitterPart.importAll("followers: "+twitterUser.screenName)'><span class="icon-plus-sign"></span></a><br/>
-	<span class="unimportant">[@twitterUser.lastUpdated.format("HH:mm dd/mm/yy")]</span>
+	<span class="unimportant">[@twitterUser.lastUpdated.format("HH:mm dd/MM/yy")]</span>
 
 	@if(withActions){
 		@modalButton(

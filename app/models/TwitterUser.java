@@ -28,6 +28,7 @@ public class TwitterUser {
 	@Indexed(value=IndexDirection.DESC) public Date added;
 	public Date lastUpdated;
 	
+	public boolean isProtected;
 	public boolean isFollower;	
 	public Date isFollowerSince;	
 	public int timesHasBeenFollower = 0;
@@ -93,6 +94,7 @@ public class TwitterUser {
 				existingTwitterUser.imageURL = t4jUser.getProfileImageURL();
 				existingTwitterUser.tweetCount = t4jUser.getStatusesCount();
 				existingTwitterUser.added = new Date();
+				existingTwitterUser.isProtected = t4jUser.isProtected();
 			}
 		}
 		existingTwitterUser.lastUpdated = new Date();

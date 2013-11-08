@@ -87,17 +87,17 @@ public class TwitterPart extends Controller {
     
     
     public static Result follow(long id) {
-    	return ok(views.html.twitter.row.render(createAndSaveAction(id, ActionType.beFriend, null)));
+    	return ok(views.html.twitter.row.render(createSaveAndPerformAction(id, ActionType.beFriend, null)));
     }
     
     public static Result unFollow(long id) {
-    	return ok(views.html.twitter.row.render(createAndSaveAction(id, ActionType.unFriend, null)));
+    	return ok(views.html.twitter.row.render(createSaveAndPerformAction(id, ActionType.unFriend, null)));
     }
     
     public static Result retweet(long userId, final long statusId) {    	    	
 		twitter4j.Status status = twitterConnection().status(statusId, RateLimitPolicy.fail);
 		final String body = status.getText();
-		return ok(views.html.twitter.row.render(createAndSaveAction(userId, ActionType.retweet, new Callback<Action>() {
+		return ok(views.html.twitter.row.render(createSaveAndPerformAction(userId, ActionType.retweet, new Callback<Action>() {
 			@Override
 			public void invoke(Action arg) {
 				arg.replyToId = statusId;
@@ -109,7 +109,7 @@ public class TwitterPart extends Controller {
     public static Result favor(long userId, final long statusId) {    	
 		twitter4j.Status status = twitterConnection().status(statusId, RateLimitPolicy.fail);
 		final String body = status.getText();
-		return ok(views.html.twitter.row.render(createAndSaveAction(userId, ActionType.like, new Callback<Action>() {
+		return ok(views.html.twitter.row.render(createSaveAndPerformAction(userId, ActionType.like, new Callback<Action>() {
 			@Override
 			public void invoke(Action arg) {
 				arg.replyToId = statusId;
@@ -200,14 +200,16 @@ public class TwitterPart extends Controller {
 		action.direction = Direction.global;
 		
 		JsonNode json = request().body().asJson();
-		JsonUpdateMapper.update(json, action);	    		    	
+		JsonUpdateMapper.update(json, action);	
+		
+		twitterConnection().performAction(action,RateLimitPolicy.fail);
     	action.save();
 
     	return ok();
 	}
 	
 	private static Result ajaxSendMessage(long targetId, ActionType actionType) {
-    	TwitterUser twitterUser = createAndSaveAction(targetId, actionType, new Callback<Action>() {
+    	TwitterUser twitterUser = createSaveAndPerformAction(targetId, actionType, new Callback<Action>() {
 			@Override
 			public void invoke(Action action) {
 				JsonNode json = request().body().asJson();    
@@ -217,7 +219,7 @@ public class TwitterPart extends Controller {
     	return ok(views.html.twitter.row.render(twitterUser));
 	}
 	
-    private static TwitterUser createAndSaveAction(long id, ActionType actionType, Callback<Action> editAction) {    	
+    private static TwitterUser createSaveAndPerformAction(long id, ActionType actionType, Callback<Action> editAction) {    	
     	final TwitterUser twitterUser = TwitterUser.find(id);    	
     	final Action action = createAction(actionType);
     	
@@ -232,6 +234,7 @@ public class TwitterPart extends Controller {
 			presence.lastActivity = action.scheduledFor;
 		}
     	
+		twitterConnection().performAction(action,RateLimitPolicy.fail);
 		action.save();    	
     	presence.save();    	
     	twitterUser.save();

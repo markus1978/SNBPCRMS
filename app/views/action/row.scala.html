@@ -2,7 +2,12 @@
 <tr class="action-holder">
 	<td class="action-type">
 		@actionType(action)<br/>
-		<span class="unimportant">[@action.scheduledFor.format("HH:mm dd/mm/yy")]</span><br>
+		<span class="unimportant">[<!-- 
+		@if(action.executedAt != null && action.executedAt.getTime() >= action.scheduledFor.getTime()){
+			-->@action.executedAt.format("HH:mm dd/MM/yy")<!-- 
+		}else{
+			-->@action.scheduledFor.format("HH:mm dd/MM/yy")<!--
+		}-->]</span><br>
 		@if(!action.isRead) {
 			<span class="label label-warn"><span class="icon-exclamation-sign"></span> unseen</span></span>		
 		}												

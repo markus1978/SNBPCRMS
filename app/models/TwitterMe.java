@@ -68,13 +68,17 @@ public class TwitterMe {
 	/** 
 	 * @return false if friendID is not part of TwitterMe friends.
 	 */
-	public boolean updateFriend(Long friendID) {
+	public boolean addFriend(Long friendID) {
 		if (friendsSet.contains(friendID)) {
 			return true;
 		} else {
 			friendsSet.add(friendID);
 			return false;
 		}
+	}
+	
+	public boolean removeFriend(long friendID) {
+		return friendsSet.remove(friendID);
 	}
 
 	/** 

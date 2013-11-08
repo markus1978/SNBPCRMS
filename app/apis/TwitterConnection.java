@@ -1,11 +1,15 @@
 package apis;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import models.Action;
+import models.Action.ActionType;
+import models.Action.Service;
 import models.Page;
 import models.TwitterMe;
 import models.TwitterPage;
@@ -277,7 +281,7 @@ public class TwitterConnection {
 				ids = twitter().getFriendsIDs(t4jUserMe.getId(), first ? -1 : ids.getNextCursor());
 				ratelimits.put("friends/ids", ids.getRateLimitStatus());
 				for (long id: ids.getIDs()) {
-					instance.updateFriend(id);
+					instance.addFriend(id);
 					if (!oldFriends.remove(id) && !isNew) {
 						twitterActionFactory.sendFollow(id);
 					}
@@ -420,5 +424,44 @@ public class TwitterConnection {
 		}
 		public abstract long getId(E item);
 		public abstract void createAction(E item);
+	}
+	
+	public void performAction(Action action, RateLimitPolicy rateLimitPolicy) {
+		if (action.service != Service.twitter) {
+			throw new IllegalArgumentException();
+		}
+		
+		try {
+			TwitterUser twitterUser = action.target.twitterUser;
+			if(action.actionType == ActionType.publicMessage) {
+				twitter().updateStatus(action.message);
+			} else if (action.actionType == ActionType.retweet) {
+				twitter().retweetStatus(action.replyToId);
+			} else if (action.actionType == ActionType.message) {
+				waitForRatelimitForBackgroundTask(rateLimitPolicy, "direct_messages/sent");
+				DirectMessage result = twitter().sendDirectMessage(twitterUser.id, action.message);
+				addRatelimit("direct_messages/sent", result.getRateLimitStatus());
+			} else if (action.actionType == ActionType.beFriend) {
+				twitter().createFriendship(twitterUser.id);
+				twitterMe.addFriend(twitterUser.id);
+			} else if (action.actionType == ActionType.unFriend) {
+				twitter().destroyFriendship(twitterUser.id);
+				twitterMe.removeFriend(twitterUser.id);
+			} else if (action.actionType == ActionType.like) {
+				twitter().createFavorite(action.replyToId);
+			}
+			
+			if (action.actionType == ActionType.beFriend || action.actionType == ActionType.unFriend) {
+				twitterMe.save();
+				waitForRatelimitForBackgroundTask(rateLimitPolicy, "users/show");
+				User t4jUser = twitter().showUser(twitterUser.id);				
+				addRatelimit("users/show", t4jUser.getRateLimitStatus());
+				TwitterUser.update(twitterUser, twitterMe, t4jUser);				
+			}
+			
+			action.executedAt = new Date();
+		} catch (TwitterException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
