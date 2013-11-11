@@ -69,7 +69,7 @@ public class Presence {
 				.limit(count)
 				.disableCursorTimeout();
 		
-		return new MongoDBPage<Presence>(query);
+		return new MorphiaPage<Presence>(query);
 	}
 	
 	public static Presence find(String id) {

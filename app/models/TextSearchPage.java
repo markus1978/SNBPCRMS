@@ -1,51 +1,61 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.mongodb.morphia.query.Query;
+import utils.DataStoreConnection;
 
-public class MongoDBPage<E> implements Page<E> {
-	private final Query<E> query;
-	private final List<E> data;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+
+public class TextSearchPage<T> implements Page<T> {
 	
-	protected MongoDBPage(Query<E> query) {
-		this.query = query;
-		data = query.asList();
+	private List<T> data;
+	
+	public TextSearchPage(BasicDBList dbList, Class<T> theClass) {
+		int length = dbList.size();
+		data = new ArrayList<T>(length);
+		for (int i = 0; i < length; i++) {
+			data.add(DataStoreConnection.map((BasicDBObject)((BasicDBObject)dbList.get(i)).get("obj"), theClass));
+		}
 	}
 	
+	@Override
 	public boolean hasNext() {
-		return data.size() == query.getLimit();
+		return false;
 	}
-	
+
+	@Override
 	public boolean hasPrev() {
-		return query.getOffset() > 0;
+		return false;
 	}
-	
+
+	@Override
 	public long getNextCursor() {
-		return query.getOffset() + data.size();
+		return 0;
 	}
-	
+
+	@Override
 	public long getPrevCursor() {
-		return query.getOffset() - query.getLimit();
+		return 0;
 	}
 
-	// delegates
-	public boolean add(E e) {
-		return data.add(e);
-	}
-
-	public void add(int index, E element) {
+	public void add(int index, T element) {
 		data.add(index, element);
 	}
 
-	public boolean addAll(Collection<? extends E> c) {
+	public boolean add(T e) {
+		return data.add(e);
+	}
+
+	public boolean addAll(Collection<? extends T> c) {
 		return data.addAll(c);
 	}
 
-	public boolean addAll(int index, Collection<? extends E> c) {
+	public boolean addAll(int index, Collection<? extends T> c) {
 		return data.addAll(index, c);
 	}
 
@@ -65,7 +75,7 @@ public class MongoDBPage<E> implements Page<E> {
 		return data.equals(o);
 	}
 
-	public E get(int index) {
+	public T get(int index) {
 		return data.get(index);
 	}
 
@@ -81,7 +91,7 @@ public class MongoDBPage<E> implements Page<E> {
 		return data.isEmpty();
 	}
 
-	public Iterator<E> iterator() {
+	public Iterator<T> iterator() {
 		return data.iterator();
 	}
 
@@ -89,15 +99,15 @@ public class MongoDBPage<E> implements Page<E> {
 		return data.lastIndexOf(o);
 	}
 
-	public ListIterator<E> listIterator() {
+	public ListIterator<T> listIterator() {
 		return data.listIterator();
 	}
 
-	public ListIterator<E> listIterator(int index) {
+	public ListIterator<T> listIterator(int index) {
 		return data.listIterator(index);
 	}
 
-	public E remove(int index) {
+	public T remove(int index) {
 		return data.remove(index);
 	}
 
@@ -113,7 +123,7 @@ public class MongoDBPage<E> implements Page<E> {
 		return data.retainAll(c);
 	}
 
-	public E set(int index, E element) {
+	public T set(int index, T element) {
 		return data.set(index, element);
 	}
 
@@ -121,7 +131,7 @@ public class MongoDBPage<E> implements Page<E> {
 		return data.size();
 	}
 
-	public List<E> subList(int fromIndex, int toIndex) {
+	public List<T> subList(int fromIndex, int toIndex) {
 		return data.subList(fromIndex, toIndex);
 	}
 
@@ -129,7 +139,9 @@ public class MongoDBPage<E> implements Page<E> {
 		return data.toArray();
 	}
 
-	public <T> T[] toArray(T[] a) {
+	public <E> E[] toArray(E[] a) {
 		return data.toArray(a);
 	}
+
+	
 }

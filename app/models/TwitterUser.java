@@ -2,6 +2,7 @@ package models;
 
 import java.util.Date;
 
+import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
@@ -9,6 +10,11 @@ import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.utils.IndexDirection;
 
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.CommandResult;
+
+import apis.TwitterConnection.RateLimitPolicy;
 import twitter4j.User;
 import utils.DataStoreConnection;
 
@@ -58,7 +64,15 @@ public class TwitterUser {
 			.disableValidation()
 			.disableCursorTimeout();
 		
-		return new MongoDBPage<TwitterUser>(query);
+		return new MorphiaPage<TwitterUser>(query);
+	}
+	
+	public static Page<TwitterUser> textSearch(String search, long cursor, RateLimitPolicy rateLimitPolicy) {
+		BasicDBObject cmd = new BasicDBObject(); //"text", new BasicDBObject("search", search));
+		cmd.put("text", "TwitterUser");
+		cmd.put("search", search);
+		CommandResult result = DataStoreConnection.datastore().getDB().command(cmd);
+		return new TextSearchPage<TwitterUser>(((BasicDBList)result.get("results")), TwitterUser.class);
 	}
 	
 	public static TwitterUser find(Long id) {

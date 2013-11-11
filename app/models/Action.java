@@ -68,7 +68,7 @@ public class Action {
 				.limit(count)
 				.disableCursorTimeout();
 		
-		return new MongoDBPage<Action>(query);
+		return new MorphiaPage<Action>(query);
 	}
 	
 	public static Action find(String id) {

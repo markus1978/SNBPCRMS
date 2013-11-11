@@ -75,6 +75,9 @@ public class TwitterPart extends Controller {
 				categorySlug = null;
 			}
 			return twitterConnection().suggestions(categorySlug, rateLimitPolicy);
+		} else if (query.startsWith("text:")) {
+			String search = query.substring("text:".length()).trim();
+			return TwitterUser.textSearch(search, cursor, rateLimitPolicy);
 		} else {
 			return TwitterUser.find(query.trim(), 20, cursor);								
 		}
