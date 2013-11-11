@@ -14,6 +14,10 @@ public class Application extends Controller {
 	// this is actually somewhat bad, since everything should be pretty stateless	
 	public static ConcurrentLinkedQueue<String> log = new ConcurrentLinkedQueue<String>();	
 	
+	public static void addMessageToLog(String message) {
+		log.add(message);
+	}
+	
 	public static Result log() {
 		JsonNode json = Json.toJson(log);
 		log.clear();		

@@ -25,18 +25,37 @@ public class TwitterActionFactory {
 	
 	private void createFollow(long id, boolean follow, boolean receive) throws TwitterException {
 		Action action = Action.create(follow ? ActionType.beFriend : ActionType.unFriend, Service.twitter, receive ? Direction.receive : Direction.send);
-		twitterConnection.waitForRatelimitForBackgroundTask(RateLimitPolicy.wait, "users/show");
-		User t4jUser = twitterConnection.twitter().showUser(id);
-		twitterConnection.addRatelimit("users/show", t4jUser.getRateLimitStatus());
-		TwitterUser twitterUser = TwitterUser.get(twitterConnection.getTwitterMe(), t4jUser);
-		Presence presence = twitterUser.getPresence();
-		action.target = presence;
-		presence.actions.add(action);
-		action.isRead = false;
 		
-		action.save();    	
-    	presence.save();    	
-    	twitterUser.save();
+		TwitterUser twitterUser = null; 
+		try {	
+			twitterConnection.waitForRatelimitForBackgroundTask(RateLimitPolicy.wait, "users/show");
+			User t4jUser = twitterConnection.twitter().showUser(id);
+			twitterConnection.addRatelimit("users/show", t4jUser.getRateLimitStatus());
+			twitterUser = TwitterUser.get(twitterConnection.getTwitterMe(), t4jUser);
+		} catch (TwitterException e) {
+			if (!twitterConnection.handleTwitterException(e, id)) {
+				return; // action is dropped and not created
+			}
+		}	
+		
+		if (twitterUser == null) {
+			// twitter user could not be retrieved from twitter, look into our db
+			twitterUser = TwitterUser.find(id);
+		}
+		
+		if (twitterUser == null) {
+			// twitter user is not available
+			// save nothing, action is dropped
+		} else {
+			Presence presence = twitterUser.getPresence();
+			action.target = presence;
+			presence.actions.add(action);
+			action.isRead = false;
+			
+			action.save();    	
+	    	presence.save();    	
+	    	twitterUser.save();
+		}
 	}
 	
 	private void createReceiveMessage(User user, String text, long id, ActionType type, Date time) {

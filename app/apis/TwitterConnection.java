@@ -29,6 +29,7 @@ import twitter4j.TwitterFactory;
 import twitter4j.User;
 import twitter4j.auth.AccessToken;
 import controllers.Application;
+import controllers.CouldNotCompleteException;
 
 public class TwitterConnection {
 	
@@ -116,7 +117,7 @@ public class TwitterConnection {
 			ratelimits.put("statuses/user_timeline", userTimelinePage.getRateLimitStatus());
 			return userTimelinePage;
 		} catch (TwitterException e) {
-			throw new RuntimeException(e);
+			throw new CouldNotCompleteException(e);
 		}
 	}
 	
@@ -127,7 +128,7 @@ public class TwitterConnection {
 			ratelimits.put("statuses/show", status.getRateLimitStatus());
 			return status;
 		} catch (TwitterException e) {
-			throw new RuntimeException(e);
+			throw new CouldNotCompleteException(e);
 		}
 	}
 	
@@ -139,7 +140,7 @@ public class TwitterConnection {
 			ratelimits.put("friends/list", twitterResponse.getRateLimitStatus());
 			return TwitterPage.create(twitterResponse, twitterMe);
     	} catch (TwitterException e) {
-    		throw new RuntimeException(e);
+    		throw new CouldNotCompleteException(e);
     	}
 	}
 
@@ -150,7 +151,7 @@ public class TwitterConnection {
 			ratelimits.put("followers/list", twitterResponse.getRateLimitStatus());
 			return TwitterPage.create(twitterResponse, twitterMe);
 		} catch (TwitterException e) {
-			throw new RuntimeException(e);
+			throw new CouldNotCompleteException(e);
 		}
     }
 	
@@ -170,7 +171,7 @@ public class TwitterConnection {
 	    	ratelimits.put("users/suggestions/:slug", response.getRateLimitStatus());
 			return TwitterPage.create(response, twitterMe);
 		} catch (TwitterException e) {
-			throw new RuntimeException(e);
+			throw new CouldNotCompleteException(e);
 		}
     }
     
@@ -260,7 +261,7 @@ public class TwitterConnection {
 				TwitterUser.update(twitterUsers.get(i++), twitterMe, t4jUser);
 			}
     	} catch (TwitterException e) {
-    		throw new RuntimeException(e);
+    		throw new CouldNotCompleteException(e);
     	}
     }
     
@@ -378,8 +379,7 @@ public class TwitterConnection {
 				}, instance.lastestDirectMessage, rateLimitPolicy, "direct_messages");										
 			}			
 		} catch (TwitterException e) {
-			addRatelimit("*", e.getRateLimitStatus());
-			throw new RuntimeException(e);
+			throw new CouldNotCompleteException(e);
 		} finally {
 			instance.save();
 		}
@@ -453,15 +453,61 @@ public class TwitterConnection {
 			
 			if (action.actionType == ActionType.beFriend || action.actionType == ActionType.unFriend) {
 				twitterMe.save();
-				waitForRatelimitForBackgroundTask(rateLimitPolicy, "users/show");
-				User t4jUser = twitter().showUser(twitterUser.id);				
-				addRatelimit("users/show", t4jUser.getRateLimitStatus());
-				TwitterUser.update(twitterUser, twitterMe, t4jUser);				
+				try {
+					waitForRatelimitForBackgroundTask(rateLimitPolicy, "users/show");				
+					User t4jUser = twitter().showUser(twitterUser.id);				
+					addRatelimit("users/show", t4jUser.getRateLimitStatus());
+					TwitterUser.update(twitterUser, twitterMe, t4jUser);
+				} catch (TwitterException e) {
+					if (!handleTwitterException(e, twitterUser.screenName)) {
+						throw e;
+					}
+				}
 			}
 			
 			action.executedAt = new Date();
 		} catch (TwitterException e) {
-			throw new RuntimeException(e);
+			throw new CouldNotCompleteException(e);
 		}
 	}
-}
+	
+	/** 
+	 * @return true if the error indicates that the current process can be continued, even without twitter.
+	 */
+	public boolean handleTwitterException(TwitterException e, Object targetData){
+		e.printStackTrace();
+		int errorCode = e.getErrorCode();
+		switch (errorCode) {
+			case 63: 
+					Application.addMessageToLog("The user " + targetData + " is suspended.");
+					return false;		// targeted user is suspended
+			case 34: 
+					Application.addMessageToLog("The object " + targetData + " does not exist.");
+					return false;  	// targeted user/status/etc. does not exist (anymore)
+			case 64:
+					Application.addMessageToLog("You have been suspended.");
+					return true;		// you have been suspended
+			case 88:
+					addRatelimit("*", e.getRateLimitStatus());
+					Application.addMessageToLog("A ratelimit was exceeded.");
+					return true;		// ratelimit exceeded
+			case 89: 					// auth token is expired
+			case 215:					// bad auth data
+			case 231:					// login need veryfiy
+			case 32:
+					Application.addMessageToLog("Something is wrong with your auth data.");
+					return true;		// could not authenticate you
+			case 130:					// over capacity 
+			case 131: 
+					Application.addMessageToLog("Twitter is currently broken.");
+					return true;		// internal error
+			case 251:					// endpoint does not exist (anymore)
+			case 68: 
+					Application.addMessageToLog("Twitter changed their API.");
+					return true;		// old api
+			default:
+					Application.addMessageToLog("Some unknown errror occured.");
+					return false;		// unknown error
+		}
+	}
+ }
